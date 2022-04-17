@@ -1,14 +1,13 @@
 package server
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/itchyny/base58-go"
+	"github.com/AXlIS/go-shortener/internal/config"
+	s "github.com/AXlIS/go-shortener/internal/storage"
+	"github.com/AXlIS/go-shortener/internal/utils"
 	"io"
-	"log"
-	"math/big"
 	"net/http"
 	"strings"
 )
@@ -24,15 +23,15 @@ type NotFoundResponse struct {
 
 // APIServer ...
 type APIServer struct {
-	config *Config
-	Data   map[string]string
+	config  *config.Config
+	storage s.Storage
 }
 
 // New ...
-func New(config *Config) *APIServer {
+func New(config *config.Config, store s.Storage) *APIServer {
 	return &APIServer{
-		config: config,
-		Data:   make(map[string]string),
+		config:  config,
+		storage: store,
 	}
 }
 
@@ -58,7 +57,7 @@ func (s *APIServer) APIHandlerUrl() http.HandlerFunc {
 				return
 			}
 			url := string(body)
-			shortUrl := GenerateShortUrl(url)
+			shortUrl := utils.GenerateShortUrl(url)
 			s.AddValue(shortUrl, url)
 
 			r := Response{
@@ -66,7 +65,7 @@ func (s *APIServer) APIHandlerUrl() http.HandlerFunc {
 				Message:  "Short Url was created",
 			}
 
-			response, err := json.Marshal(r)
+			resp, err := json.Marshal(r)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
@@ -74,7 +73,8 @@ func (s *APIServer) APIHandlerUrl() http.HandlerFunc {
 
 			w.Header().Set("content-type", "application/json")
 			w.WriteHeader(http.StatusCreated)
-			w.Write(response)
+			w.Write(resp)
+			return
 
 		case "GET":
 			key := strings.Split(r.URL.RequestURI(), "/")[1]
@@ -86,6 +86,7 @@ func (s *APIServer) APIHandlerUrl() http.HandlerFunc {
 
 			w.Header().Set("Location", url)
 			w.WriteHeader(http.StatusTemporaryRedirect)
+			return
 
 		default:
 			body := NotFoundResponse{
@@ -106,34 +107,12 @@ func (s *APIServer) APIHandlerUrl() http.HandlerFunc {
 }
 
 func (s *APIServer) AddValue(key, value string) {
-	s.Data[key] = value
+	s.storage[key] = value
 }
 
 func (s *APIServer) GetValue(key string) (string, error) {
-	if value, found := s.Data[key]; found {
+	if value, found := s.storage[key]; found {
 		return value, nil
 	}
 	return "", errors.New("the map didn't contains this key")
-}
-
-func GenerateShortUrl(url string) string {
-	urlHashBytes := sha256Of(url)
-	generatedNumber := new(big.Int).SetBytes(urlHashBytes).Uint64()
-	finalString := base58Encoded([]byte(fmt.Sprintf("%d", generatedNumber)))
-	return finalString[:10]
-}
-
-func sha256Of(initialString string) []byte {
-	encoder := sha256.New()
-	encoder.Write([]byte(initialString))
-	return encoder.Sum(nil)
-}
-
-func base58Encoded(bytes []byte) string {
-	encoding := base58.BitcoinEncoding
-	encoded, err := encoding.Encode(bytes)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(encoded)
 }

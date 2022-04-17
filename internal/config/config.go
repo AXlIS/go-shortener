@@ -1,4 +1,4 @@
-package server
+package config
 
 // Config ...
 type Config struct {
