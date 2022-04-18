@@ -11,6 +11,8 @@ import (
 	"testing"
 )
 
+var conf = config.NewConfig()
+
 type Want struct {
 	code     int
 	response string
@@ -36,22 +38,18 @@ func TestAPIServer_APIHandlerPost(t *testing.T) {
 		},
 	}
 
-	conf := &config.Config{
-		Port: ":8080",
-	}
-
 	for _, tt := range tests {
 
 		server := New(conf, tt.storage)
+		router := server.SetupRouter()
 
 		t.Run(tt.name, func(t *testing.T) {
 			reader := strings.NewReader(tt.body)
 
-			request := httptest.NewRequest(http.MethodPost, tt.request, reader)
+			req := httptest.NewRequest(http.MethodPost, tt.request, reader)
 			w := httptest.NewRecorder()
-			h := server.APIHandlerUrl()
+			router.ServeHTTP(w, req)
 
-			h.ServeHTTP(w, request)
 			resp := w.Result()
 
 			defer resp.Body.Close()
@@ -61,7 +59,7 @@ func TestAPIServer_APIHandlerPost(t *testing.T) {
 			}
 
 			assert.Equal(t, resp.StatusCode, tt.want.code)
-			assert.Equal(t, string(body), strings.Replace(tt.want.response, "localhost:8080", request.Host, 1))
+			assert.Equal(t, string(body), strings.Replace(tt.want.response, "localhost:8080", req.Host, 1))
 			assert.NoError(t, err)
 		})
 	}
@@ -86,20 +84,16 @@ func TestAPIServer_APIHandlerGet(t *testing.T) {
 		},
 	}
 
-	conf := &config.Config{
-		Port: ":8080",
-	}
-
 	for _, tt := range tests {
 
 		server := New(conf, tt.storage)
+		router := server.SetupRouter()
 
 		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest(http.MethodGet, tt.request, nil)
+			req := httptest.NewRequest(http.MethodGet, tt.request, nil)
 			w := httptest.NewRecorder()
-			h := server.APIHandlerUrl()
 
-			h.ServeHTTP(w, request)
+			router.ServeHTTP(w, req)
 			resp := w.Result()
 
 			assert.Equal(t, resp.StatusCode, tt.want.code)

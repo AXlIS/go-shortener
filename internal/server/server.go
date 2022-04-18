@@ -1,15 +1,12 @@
 package server
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/AXlIS/go-shortener/internal/config"
 	s "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/AXlIS/go-shortener/internal/utils"
+	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
-	"strings"
 )
 
 type Response struct {
@@ -35,84 +32,65 @@ func New(config *config.Config, store s.Storage) *APIServer {
 	}
 }
 
+// SetupRouter ...
+func (s *APIServer) SetupRouter() *gin.Engine {
+	router := gin.Default()
+
+	router.POST("/", s.PostUrlHandler)
+	router.GET("/:id", s.GetUrlHandler)
+
+	return router
+}
+
 // Start ...
 func (s *APIServer) Start() error {
-	server := &http.Server{
-		Addr: s.config.Port,
-	}
+	r := s.SetupRouter()
 
-	http.HandleFunc("/", s.APIHandlerUrl())
-	fmt.Println("Start")
-	return server.ListenAndServe()
+	return r.Run(s.config.Port)
 }
 
-func (s *APIServer) APIHandlerUrl() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (s *APIServer) PostUrlHandler(c *gin.Context) {
 
-		switch r.Method {
-		case "POST":
-			body, err := io.ReadAll(r.Body)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-			url := string(body)
-			shortUrl := utils.GenerateShortUrl(url)
-			s.AddValue(shortUrl, url)
-
-			r := Response{
-				ShortUrl: "http://" + r.Host + "/" + shortUrl,
-				Message:  "Short Url was created",
-			}
-
-			resp, err := json.Marshal(r)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-
-			w.Header().Set("content-type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			w.Write(resp)
-			return
-
-		case "GET":
-			key := strings.Split(r.URL.RequestURI(), "/")[1]
-			url, err := s.GetValue(key)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusNotFound)
-				return
-			}
-
-			w.Header().Set("Location", url)
-			w.WriteHeader(http.StatusTemporaryRedirect)
-			return
-
-		default:
-			body := NotFoundResponse{
-				Message: "Resource Not Found",
-			}
-			resp, err := json.Marshal(body)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-			w.Header().Set("content-type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write(resp)
-			return
-		}
-
+	defer c.Request.Body.Close()
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
 	}
+
+	url := string(body)
+	shortUrl := utils.GenerateShortUrl(url)
+	s.storage.AddValue(shortUrl, url)
+
+	resBody := Response{
+		ShortUrl: "http://" + c.Request.Host + "/" + shortUrl,
+		Message:  "Short Url was created",
+	}
+
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Header("content-type", "application/json")
+	c.JSON(http.StatusCreated, resBody)
+	return
 }
 
-func (s *APIServer) AddValue(key, value string) {
-	s.storage[key] = value
-}
-
-func (s *APIServer) GetValue(key string) (string, error) {
-	if value, found := s.storage[key]; found {
-		return value, nil
+func (s *APIServer) GetUrlHandler(c *gin.Context) {
+	key := c.Params.ByName("id")
+	if key == "" {
+		c.String(http.StatusBadRequest, "The query parameter is missing")
+		return
 	}
-	return "", errors.New("the map didn't contains this key")
+
+	url, err := s.storage.GetValue(key)
+	if err != nil {
+		c.String(http.StatusNotFound, err.Error())
+		return
+	}
+
+	c.Header("Location", url)
+	c.Status(http.StatusTemporaryRedirect)
+	return
 }
