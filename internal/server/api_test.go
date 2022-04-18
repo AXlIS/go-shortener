@@ -95,6 +95,7 @@ func TestAPIServer_APIHandlerGet(t *testing.T) {
 
 			router.ServeHTTP(w, req)
 			resp := w.Result()
+			defer resp.Body.Close()
 
 			assert.Equal(t, resp.StatusCode, tt.want.code)
 		})

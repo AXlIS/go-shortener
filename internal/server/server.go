@@ -10,7 +10,7 @@ import (
 )
 
 type Response struct {
-	ShortUrl string `json:"url"`
+	ShortURL string `json:"url"`
 	Message  string `json:"message"`
 }
 
@@ -63,13 +63,12 @@ func (s *APIServer) PostURLHandler(c *gin.Context) {
 	s.storage.AddValue(shortURL, url)
 
 	resBody := Response{
-		ShortUrl: "http://" + c.Request.Host + "/" + shortURL,
+		ShortURL: "http://" + c.Request.Host + "/" + shortURL,
 		Message:  "Short Url was created",
 	}
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusCreated, resBody)
-	return
 }
 
 func (s *APIServer) GetURLHandler(c *gin.Context) {
@@ -87,5 +86,4 @@ func (s *APIServer) GetURLHandler(c *gin.Context) {
 
 	c.Header("Location", url)
 	c.Status(http.StatusTemporaryRedirect)
-	return
 }
