@@ -36,8 +36,8 @@ func New(config *config.Config, store s.Storage) *APIServer {
 func (s *APIServer) SetupRouter() *gin.Engine {
 	router := gin.Default()
 
-	router.POST("/", s.PostUrlHandler)
-	router.GET("/:id", s.GetUrlHandler)
+	router.POST("/", s.PostURLHandler)
+	router.GET("/:id", s.GetURLHandler)
 
 	return router
 }
@@ -49,7 +49,7 @@ func (s *APIServer) Start() error {
 	return r.Run(s.config.Port)
 }
 
-func (s *APIServer) PostUrlHandler(c *gin.Context) {
+func (s *APIServer) PostURLHandler(c *gin.Context) {
 
 	defer c.Request.Body.Close()
 	body, err := io.ReadAll(c.Request.Body)
@@ -59,17 +59,12 @@ func (s *APIServer) PostUrlHandler(c *gin.Context) {
 	}
 
 	url := string(body)
-	shortUrl := utils.GenerateShortUrl(url)
-	s.storage.AddValue(shortUrl, url)
+	shortURL := utils.GenerateShortURL(url)
+	s.storage.AddValue(shortURL, url)
 
 	resBody := Response{
-		ShortUrl: "http://" + c.Request.Host + "/" + shortUrl,
+		ShortUrl: "http://" + c.Request.Host + "/" + shortURL,
 		Message:  "Short Url was created",
-	}
-
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
 	}
 
 	c.Header("content-type", "application/json")
@@ -77,7 +72,7 @@ func (s *APIServer) PostUrlHandler(c *gin.Context) {
 	return
 }
 
-func (s *APIServer) GetUrlHandler(c *gin.Context) {
+func (s *APIServer) GetURLHandler(c *gin.Context) {
 	key := c.Params.ByName("id")
 	if key == "" {
 		c.String(http.StatusBadRequest, "The query parameter is missing")
