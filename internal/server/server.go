@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/AXlIS/go-shortener/internal/config"
 	s "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/AXlIS/go-shortener/internal/utils"
@@ -62,7 +63,7 @@ func (s *APIServer) PostURLHandler(c *gin.Context) {
 	shortURL := utils.GenerateShortURL(url)
 	s.storage.AddValue(shortURL, url)
 
-	shortURL = "http://" + c.Request.Host + "/" + shortURL
+	shortURL = fmt.Sprintf("http://%s/%s", c.Request.Host, shortURL)
 
 	c.Header("content-type", "application/json")
 	c.String(http.StatusCreated, shortURL)
