@@ -10,9 +10,9 @@ import (
 
 func main() {
 	viper.SetConfigFile(".env")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal(err)
-	}
+	//if err := viper.ReadInConfig(); err != nil {
+	//	log.Fatal(err)
+	//}
 
 	conf := config.NewConfig()
 	if err := viper.Unmarshal(conf); err != nil {
