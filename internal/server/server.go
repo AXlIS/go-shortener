@@ -62,13 +62,10 @@ func (s *APIServer) PostURLHandler(c *gin.Context) {
 	shortURL := utils.GenerateShortURL(url)
 	s.storage.AddValue(shortURL, url)
 
-	resBody := Response{
-		ShortURL: "http://" + c.Request.Host + "/" + shortURL,
-		Message:  "Short Url was created",
-	}
+	shortURL = "http://" + c.Request.Host + "/" + shortURL
 
 	c.Header("content-type", "application/json")
-	c.JSON(http.StatusCreated, resBody)
+	c.String(http.StatusCreated, shortURL)
 }
 
 func (s *APIServer) GetURLHandler(c *gin.Context) {

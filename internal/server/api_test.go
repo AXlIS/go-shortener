@@ -33,7 +33,7 @@ func TestAPIServer_APIHandlerPost(t *testing.T) {
 			storage: map[string]string{},
 			want: Want{
 				code:     201,
-				response: `{"url":"http://localhost:8080/KRJARhJf5S","message":"Short Url was created"}`,
+				response: "http://localhost:8080/KRJARhJf5S",
 			},
 		},
 	}
@@ -59,7 +59,7 @@ func TestAPIServer_APIHandlerPost(t *testing.T) {
 			}
 
 			assert.Equal(t, resp.StatusCode, tt.want.code)
-			assert.Equal(t, string(body), strings.Replace(tt.want.response, "localhost:8080", req.Host, 1))
+			assert.Equal(t, strings.Replace(tt.want.response, "localhost:8080", req.Host, 1), string(body))
 			assert.NoError(t, err)
 		})
 	}
@@ -74,9 +74,9 @@ func TestAPIServer_APIHandlerGet(t *testing.T) {
 	}{
 		{
 			name:    "GET 200 url test",
-			request: "/KRJARhJf5S",
+			request: "/VzGUU3fuyV",
 			storage: map[string]string{
-				"KRJARhJf5S": "https://www.yandex.ru/",
+				"VzGUU3fuyV": "https://www.yandex.ru/",
 			},
 			want: Want{
 				code: 307,
