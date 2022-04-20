@@ -22,11 +22,11 @@ type NotFoundResponse struct {
 // APIServer ...
 type APIServer struct {
 	config  *config.Config
-	storage s.Storage
+	storage *s.Storage
 }
 
 // New ...
-func New(config *config.Config, store s.Storage) *APIServer {
+func New(config *config.Config, store *s.Storage) *APIServer {
 	return &APIServer{
 		config:  config,
 		storage: store,

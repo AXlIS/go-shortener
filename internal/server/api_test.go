@@ -23,14 +23,14 @@ func TestAPIServer_APIHandlerPost(t *testing.T) {
 		name    string
 		request string
 		body    string
-		storage storage.Storage
+		storage *storage.Storage
 		want    Want
 	}{
 		{
 			name:    "POST 201 OK test",
 			request: "/",
 			body:    "https://www.yandex.ru/",
-			storage: map[string]string{},
+			storage: storage.NewStorage(),
 			want: Want{
 				code:     201,
 				response: "http://localhost:8080/KRJARhJf5S",
@@ -69,14 +69,16 @@ func TestAPIServer_APIHandlerGet(t *testing.T) {
 	tests := []struct {
 		name    string
 		request string
-		storage storage.Storage
+		storage *storage.Storage
 		want    Want
 	}{
 		{
 			name:    "GET 200 url test",
 			request: "/VzGUU3fuyV",
-			storage: map[string]string{
-				"VzGUU3fuyV": "https://www.yandex.ru/",
+			storage: &storage.Storage{
+				List: map[string]string{
+					"VzGUU3fuyV": "https://www.yandex.ru/",
+				},
 			},
 			want: Want{
 				code: 307,
