@@ -27,7 +27,7 @@ func main() {
 
 	s := new(server.Server)
 
-	if err := s.Start("8000", handlers.InitRoutes()); err != nil {
+	if err := s.Start("8080", handlers.InitRoutes()); err != nil {
 		log.Fatalf("Error occured while running http server: %s", err.Error())
 	}
 }
