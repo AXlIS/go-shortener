@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/AXlIS/go-shortener/internal/service"
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 )
 
@@ -22,20 +23,25 @@ func NewHandler(service *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	router.POST("/", h.CreateShorten)
+	router.GET("/:id", h.GetShorten)
+
 	api := router.Group("/api")
 	{
-		api.POST("/shorten", h.CreateShorten)
-		api.GET("/:id", h.GetShorten)
+		api.POST("/shorten", h.CreateJSONShorten)
 	}
 
 	return router
 }
 
-func (h *Handler) CreateShorten(c *gin.Context) {
+func (h *Handler) CreateJSONShorten(c *gin.Context) {
 	var input ShortenInput
 	if err := c.BindJSON(&input); err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
+
+	fmt.Println(input)
 
 	shortURL := h.service.AddURL(input.Url)
 
@@ -52,6 +58,8 @@ func (h *Handler) GetShorten(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(key)
+
 	url, err := h.service.GetURL(key)
 	if err != nil {
 		errorResponse(c, http.StatusNotFound, err.Error())
@@ -60,4 +68,18 @@ func (h *Handler) GetShorten(c *gin.Context) {
 
 	c.Header("Location", url)
 	c.Status(http.StatusTemporaryRedirect)
+}
+
+func (h *Handler) CreateShorten(c *gin.Context) {
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	fmt.Println(string(body))
+
+	shortURL := h.service.AddURL(string(body))
+
+	c.Header("content-type", "application/json")
+	c.String(http.StatusCreated, fmt.Sprintf("http://%s/%s", c.Request.Host, shortURL))
 }
