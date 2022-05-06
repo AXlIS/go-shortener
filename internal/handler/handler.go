@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/AXlIS/go-shortener/internal/service"
 	"github.com/gin-gonic/gin"
@@ -36,12 +37,17 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 func (h *Handler) CreateJSONShorten(c *gin.Context) {
 	var input ShortenInput
-	if err := c.BindJSON(&input); err != nil {
+
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	fmt.Println(input)
+	if err := json.Unmarshal(body, &input); err != nil {
+		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	shortURL := h.service.AddURL(input.Url)
 
@@ -58,8 +64,6 @@ func (h *Handler) GetShorten(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(key)
-
 	url, err := h.service.GetURL(key)
 	if err != nil {
 		errorResponse(c, http.StatusNotFound, err.Error())
@@ -74,9 +78,8 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
-
-	fmt.Println(string(body))
 
 	shortURL := h.service.AddURL(string(body))
 
