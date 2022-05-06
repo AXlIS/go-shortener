@@ -2,7 +2,9 @@ package main
 
 import (
 	"github.com/AXlIS/go-shortener/internal/config"
+	"github.com/AXlIS/go-shortener/internal/handler"
 	"github.com/AXlIS/go-shortener/internal/server"
+	"github.com/AXlIS/go-shortener/internal/service"
 	store "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/spf13/viper"
 	"log"
@@ -20,9 +22,12 @@ func main() {
 	}
 
 	storage := store.NewStorage()
+	services := service.NewService(storage)
+	handlers := handler.NewHandler(services)
 
-	s := server.New(conf, storage)
-	if err := s.Start(); err != nil {
-		log.Fatal(err)
+	s := new(server.Server)
+
+	if err := s.Start("8000", handlers.InitRoutes()); err != nil {
+		log.Fatalf("Error occured while running http server: %s", err.Error())
 	}
 }

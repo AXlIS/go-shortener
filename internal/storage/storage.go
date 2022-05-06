@@ -13,7 +13,6 @@ func NewStorage() *Storage {
 	}
 }
 
-
 func (s *Storage) AddValue(key, value string) {
 	s.List[key] = value
 }
