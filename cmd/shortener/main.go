@@ -7,7 +7,6 @@ import (
 	"github.com/AXlIS/go-shortener/internal/service"
 	store "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/joho/godotenv"
-	"github.com/sirupsen/logrus"
 	"log"
 )
 
