@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -22,7 +21,7 @@ type Server struct {
 // Start ...
 func (s *Server) Start(port string, handler http.Handler) error {
 	s.httpServer = &http.Server{
-		Addr:           fmt.Sprintf(":%s", port),
+		Addr:           port,
 		Handler:        handler,
 		MaxHeaderBytes: 1 << 20,
 	}

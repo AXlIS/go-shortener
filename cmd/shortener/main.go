@@ -6,6 +6,8 @@ import (
 	"github.com/AXlIS/go-shortener/internal/server"
 	"github.com/AXlIS/go-shortener/internal/service"
 	store "github.com/AXlIS/go-shortener/internal/storage"
+	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"log"
 )
 
@@ -13,6 +15,10 @@ func main() {
 	storage := store.NewStorage()
 	services := service.NewService(storage)
 	handlers := handler.NewHandler(services)
+
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading env variables: %s", err.Error())
+	}
 
 	s := new(server.Server)
 
