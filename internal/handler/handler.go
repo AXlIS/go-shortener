@@ -50,7 +50,12 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 		return
 	}
 
-	shortURL := h.service.AddURL(input.URL)
+	shortURL, err := h.service.AddURL(input.URL)
+	if err != nil {
+		fmt.Println(3)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusCreated, map[string]string{
@@ -82,7 +87,12 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 		return
 	}
 
-	shortURL := h.service.AddURL(string(body))
+	shortURL, err := h.service.AddURL(string(body))
+	if err != nil {
+		fmt.Println(3)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	c.Header("content-type", "application/json")
 	c.String(http.StatusCreated, fmt.Sprintf("%s/%s", config.GetEnv("BASE_URL", "http://localhost:8080"), shortURL))

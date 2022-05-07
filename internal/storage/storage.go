@@ -2,6 +2,12 @@ package storage
 
 import "errors"
 
+type URLWorker interface {
+	AddValue(key, value string) error
+	GetValue(key string) (string, error)
+	Close() error
+}
+
 type Storage struct {
 	List map[string]string
 }
@@ -13,8 +19,9 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) AddValue(key, value string) {
+func (s *Storage) AddValue(key, value string) error {
 	s.List[key] = value
+	return nil
 }
 
 func (s *Storage) GetValue(key string) (string, error) {
@@ -22,4 +29,8 @@ func (s *Storage) GetValue(key string) (string, error) {
 		return value, nil
 	}
 	return "", errors.New("the map didn't contains this key")
+}
+
+func (s *Storage) Close() error {
+	return nil
 }

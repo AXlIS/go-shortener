@@ -1,27 +1,31 @@
 package service
 
 import (
+	"fmt"
 	"github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/AXlIS/go-shortener/internal/utils"
 )
 
 type Service struct {
-	storage *storage.Storage
+	storage storage.URLWorker
 }
 
-func NewService(storage *storage.Storage) *Service {
+func NewService(storage storage.URLWorker) *Service {
 	return &Service{
 		storage: storage,
 	}
 }
 
-func (s *Service) AddURL(url string) string {
+func (s *Service) AddURL(url string) (string, error) {
 	shortURL := utils.GenerateShortURL(url)
-	s.storage.AddValue(shortURL, url)
-	return shortURL
+	if err := s.storage.AddValue(shortURL, url); err != nil {
+		fmt.Println(5)
+		return "", err
+	}
+	return shortURL, nil
 }
 
-func (s *Service) GetURL(key string) (string, error){
+func (s *Service) GetURL(key string) (string, error) {
 	url, err := s.storage.GetValue(key)
 	if err != nil {
 		return "", err
