@@ -58,7 +58,7 @@ func TestServer_CreateJSONShorten(t *testing.T) {
 			body, err := io.ReadAll(resp.Body)
 
 			assert.Equal(t, tt.want.code, resp.StatusCode)
-			assert.Equal(t, strings.Replace(tt.want.response, "localhost:8080", req.Host, 1), string(body))
+			assert.Equal(t, tt.want.response, string(body))
 			assert.NoError(t, err)
 		})
 	}
@@ -144,7 +144,7 @@ func TestServer_CreateShorten(t *testing.T) {
 			body, err := io.ReadAll(resp.Body)
 
 			assert.Equal(t, tt.want.code, resp.StatusCode)
-			assert.Equal(t, strings.Replace(tt.want.response, "localhost:8080", req.Host, 1), string(body))
+			assert.Equal(t, tt.want.response, string(body))
 			assert.NoError(t, err)
 		})
 	}

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/service"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -53,7 +54,7 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusCreated, map[string]string{
-		"result": fmt.Sprintf("http://%s/%s", c.Request.Host, shortURL),
+		"result": fmt.Sprintf("%s/%s", config.GetEnv("BASE_URL", "http://localhost:8080"), shortURL),
 	})
 }
 
@@ -84,5 +85,5 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 	shortURL := h.service.AddURL(string(body))
 
 	c.Header("content-type", "application/json")
-	c.String(http.StatusCreated, fmt.Sprintf("http://%s/%s", c.Request.Host, shortURL))
+	c.String(http.StatusCreated, fmt.Sprintf("%s/%s", config.GetEnv("BASE_URL", "http://localhost:8080"), shortURL))
 }
