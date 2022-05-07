@@ -15,7 +15,7 @@ type Handler struct {
 }
 
 type ShortenInput struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 func NewHandler(service *service.Service) *Handler {
@@ -50,7 +50,7 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 		return
 	}
 
-	shortURL := h.service.AddURL(input.Url)
+	shortURL := h.service.AddURL(input.URL)
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusCreated, map[string]string{
