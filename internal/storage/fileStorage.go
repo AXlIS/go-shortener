@@ -67,9 +67,3 @@ func (s *FileStorage) GetValue(key string) (string, error) {
 	}
 	return "", errors.New("storage didn't contains this key")
 }
-
-func (s *FileStorage) Close() error {
-
-
-	return nil
-}

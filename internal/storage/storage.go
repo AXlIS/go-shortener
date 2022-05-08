@@ -5,7 +5,6 @@ import "errors"
 type URLWorker interface {
 	AddValue(key, value string) error
 	GetValue(key string) (string, error)
-	Close() error
 }
 
 type Storage struct {
@@ -29,8 +28,4 @@ func (s *Storage) GetValue(key string) (string, error) {
 		return value, nil
 	}
 	return "", errors.New("the map didn't contains this key")
-}
-
-func (s *Storage) Close() error {
-	return nil
 }
