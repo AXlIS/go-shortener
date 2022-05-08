@@ -33,7 +33,6 @@ func main() {
 	} else {
 		storage = store.NewStorage()
 	}
-	defer storage.Close()
 
 	services := service.NewService(storage)
 	handlers := handler.NewHandler(services)
