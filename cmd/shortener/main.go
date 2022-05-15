@@ -9,7 +9,6 @@ import (
 	store "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/joho/godotenv"
 	"log"
-	"os"
 )
 
 var (
@@ -26,12 +25,7 @@ func init() {
 	flag.StringVar(&baseURL, "b", "http://localhost:8080", "base url")
 	flag.Parse()
 
-	if path := config.GetEnv("BASE_URL", ""); path == "" {
-		file, _ := os.OpenFile("./.env", os.O_WRONLY|os.O_APPEND, 0777)
-		if _, err := file.Write([]byte("\nBASE_URL=" + baseURL)); err != nil {
-			log.Fatalf("error: %s", err.Error())
-		}
-	} else {
+	if path := config.GetEnv("BASE_URL", ""); path != "" {
 		baseURL = path
 	}
 }
