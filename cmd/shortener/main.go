@@ -9,14 +9,19 @@ import (
 	store "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/joho/godotenv"
 	"log"
+	"os"
 )
 
 var (
 	fileStoragePath, serverAddress, baseURL string
+	envPath = "./.env"
 )
 
 func init() {
-	if err := godotenv.Load(); err != nil {
+	if _, err := os.Stat(envPath); os.IsNotExist(err) {
+		_, _ = os.Create(envPath)
+	}
+	if err := godotenv.Load(envPath); err != nil {
 		log.Fatalf("Error loading env variables: %s", err.Error())
 	}
 
@@ -31,7 +36,7 @@ func init() {
 		"FILE_STORAGE_PATH": fileStoragePath,
 	}
 
-	if err := godotenv.Write(env, "./.env"); err != nil {
+	if err := godotenv.Write(env, envPath); err != nil {
 		log.Fatalf("error: %s", err.Error())
 	}
 }
