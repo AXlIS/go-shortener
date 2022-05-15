@@ -4,12 +4,12 @@ import "os"
 
 // Config ...
 type Config struct {
-	Port string
+	BaseURL string
 }
 
-func NewConfig() *Config {
+func NewConfig(URL string) *Config {
 	return &Config{
-		Port: ":8080",
+		BaseURL: URL,
 	}
 }
 

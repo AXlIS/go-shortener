@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/handler"
 	"github.com/AXlIS/go-shortener/internal/service"
 	"github.com/AXlIS/go-shortener/internal/storage"
@@ -39,7 +40,8 @@ func TestServer_CreateJSONShorten(t *testing.T) {
 
 	store := storage.NewStorage()
 	services := service.NewService(store)
-	handlers := handler.NewHandler(services)
+	conf := config.NewConfig("http://localhost:8080")
+	handlers := handler.NewHandler(services, conf)
 
 	router := handlers.InitRoutes()
 
@@ -88,7 +90,8 @@ func TestServer_GetShorten(t *testing.T) {
 	for _, tt := range tests {
 
 		services := service.NewService(tt.storage)
-		handlers := handler.NewHandler(services)
+		conf := config.NewConfig("http://localhost:8080")
+		handlers := handler.NewHandler(services, conf)
 
 		router := handlers.InitRoutes()
 
@@ -127,7 +130,8 @@ func TestServer_CreateShorten(t *testing.T) {
 
 	store := storage.NewStorage()
 	services := service.NewService(store)
-	handlers := handler.NewHandler(services)
+	conf := config.NewConfig("http://localhost:8080")
+	handlers := handler.NewHandler(services, conf)
 
 	router := handlers.InitRoutes()
 

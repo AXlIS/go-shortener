@@ -9,6 +9,7 @@ import (
 	store "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/joho/godotenv"
 	"log"
+	"os"
 )
 
 var (
@@ -25,6 +26,12 @@ func init() {
 	flag.StringVar(&baseURL, "b", "http://localhost:8080", "base url")
 	flag.Parse()
 
+	if path := config.GetEnv("BASE_URL", ""); path == "" {
+		file, _ := os.OpenFile("./.env", os.O_WRONLY|os.O_APPEND, 0777)
+		if _, err := file.Write([]byte("\nBASE_URL=" + baseURL)); err != nil {
+			log.Fatalf("error: %s", err.Error())
+		}
+	}
 }
 
 func main() {
@@ -44,7 +51,8 @@ func main() {
 	}
 
 	services := service.NewService(storage)
-	handlers := handler.NewHandler(services)
+	conf := config.NewConfig(baseURL)
+	handlers := handler.NewHandler(services, conf)
 
 	s := new(server.Server)
 

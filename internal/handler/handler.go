@@ -12,14 +12,15 @@ import (
 
 type Handler struct {
 	service *service.Service
+	config *config.Config
 }
 
 type ShortenInput struct {
 	URL string `json:"url"`
 }
 
-func NewHandler(service *service.Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *service.Service, conf *config.Config) *Handler {
+	return &Handler{service: service, config: conf}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
@@ -59,7 +60,7 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusCreated, map[string]string{
-		"result": fmt.Sprintf("%s/%s", config.GetEnv("BASE_URL", "http://localhost:8080"), shortURL),
+		"result": fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL),
 	})
 }
 
@@ -95,5 +96,5 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 	}
 
 	c.Header("content-type", "application/json")
-	c.String(http.StatusCreated, fmt.Sprintf("%s/%s", config.GetEnv("BASE_URL", "http://localhost:8080"), shortURL))
+	c.String(http.StatusCreated, fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL))
 }
