@@ -31,6 +31,8 @@ func init() {
 		if _, err := file.Write([]byte("\nBASE_URL=" + baseURL)); err != nil {
 			log.Fatalf("error: %s", err.Error())
 		}
+	} else {
+		baseURL = path
 	}
 }
 
