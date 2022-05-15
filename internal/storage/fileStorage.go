@@ -17,7 +17,8 @@ func NewFileStorage(filePath string) (*FileStorage, error) {
 	fmt.Println(1, filePath)
 	var storage = &FileStorage{FilePath: filePath}
 
-	file, err := os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0777)
+	_ = os.Mkdir("/tmp", 0750)
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0777)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +44,7 @@ func NewFileStorage(filePath string) (*FileStorage, error) {
 func (s *FileStorage) AddValue(key, value string) error {
 	s.List[key] = value
 
-	file, err := os.OpenFile(s.FilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
+	file, err := os.OpenFile(s.FilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return err
 	}
