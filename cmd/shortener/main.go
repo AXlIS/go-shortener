@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/handler"
 	"github.com/AXlIS/go-shortener/internal/server"
@@ -11,9 +11,28 @@ import (
 	"log"
 )
 
+var (
+	fileStoragePath, serverAddress, baseURL string
+)
+
 func init() {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("./.env"); err != nil {
 		log.Fatalf("Error loading env variables: %s", err.Error())
+	}
+
+	flag.StringVar(&fileStoragePath, "f", config.GetEnv("FILE_STORAGE_PATH", "./storage.json"), "path to file")
+	flag.StringVar(&serverAddress, "a", config.GetEnv("SERVER_ADDRESS", ":8080"), "port")
+	flag.StringVar(&baseURL, "b", config.GetEnv("BASE_URL", "http://localhost:8080"), "base url")
+	flag.Parse()
+
+	env := map[string]string{
+		"BASE_URL":          baseURL,
+		"SERVER_ADDRESS":    serverAddress,
+		"FILE_STORAGE_PATH": fileStoragePath,
+	}
+
+	if err := godotenv.Write(env, "./.env"); err != nil {
+		log.Fatalf("error: %s", err.Error())
 	}
 }
 
@@ -23,10 +42,8 @@ func main() {
 		err     error
 	)
 
-	fmt.Println(2, config.GetEnv("FILE_STORAGE_PATH", ""))
-
-	if filePath := config.GetEnv("FILE_STORAGE_PATH", ""); filePath != "" {
-		storage, err = store.NewFileStorage(filePath)
+	if fileStoragePath != "" {
+		storage, err = store.NewFileStorage(fileStoragePath)
 		if err != nil {
 			log.Fatalf("error: %s", err.Error())
 		}
@@ -39,7 +56,7 @@ func main() {
 
 	s := new(server.Server)
 
-	if err := s.Start(config.GetEnv("SERVER_ADDRESS", "8080"), handlers.InitRoutes()); err != nil {
+	if err := s.Start(serverAddress, handlers.InitRoutes()); err != nil {
 		log.Fatalf("Error occured while running http server: %s", err.Error())
 	}
 }
