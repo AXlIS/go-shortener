@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/service"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -25,6 +26,8 @@ func NewHandler(service *service.Service, conf *config.Config) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	router.POST("/", h.CreateShorten)
 	router.GET("/:id", h.GetShorten)

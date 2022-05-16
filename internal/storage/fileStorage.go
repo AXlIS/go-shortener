@@ -3,7 +3,6 @@ package storage
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 )
@@ -14,7 +13,7 @@ type FileStorage struct {
 }
 
 func NewFileStorage(filePath string) (*FileStorage, error) {
-	fmt.Println(1, filePath)
+
 	var storage = &FileStorage{FilePath: filePath}
 
 	_ = os.Mkdir("/tmp", 0750)
