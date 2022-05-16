@@ -27,6 +27,7 @@ func NewHandler(service *service.Service, conf *config.Config) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	router.Use(DecompressBody())
 	router.Use(gzip.Gzip(gzip.BestCompression))
 
 	router.POST("/", h.CreateShorten)
