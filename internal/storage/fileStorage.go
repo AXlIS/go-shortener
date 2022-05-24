@@ -3,13 +3,15 @@ package storage
 import (
 	"encoding/json"
 	"errors"
+	u "github.com/AXlIS/go-shortener"
 	"io"
 	"os"
 )
 
 type FileStorage struct {
+	URLWorker
 	FilePath string
-	List     map[string]string
+	List     map[string]map[string]string
 }
 
 func NewFileStorage(filePath string) (*FileStorage, error) {
@@ -29,7 +31,7 @@ func NewFileStorage(filePath string) (*FileStorage, error) {
 	}
 
 	if len(data) == 0 {
-		storage.List = make(map[string]string)
+		storage.List = make(map[string]map[string]string)
 		return storage, nil
 	}
 
@@ -40,15 +42,19 @@ func NewFileStorage(filePath string) (*FileStorage, error) {
 	return storage, nil
 }
 
-func (s *FileStorage) AddValue(key, value string) error {
-	s.List[key] = value
+func (s *FileStorage) AddValue(key, value, userId string) error {
+
+	if _, found := s.List[userId]; !found {
+		s.List[userId] = make(map[string]string)
+	}
+	s.List[userId][key] = value
 
 	file, err := os.OpenFile(s.FilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return err
 	}
 
-	data, err := json.Marshal(s.List)
+	data, err := json.MarshalIndent(s.List, "", "	")
 	if err != nil {
 		return err
 	}
@@ -61,9 +67,23 @@ func (s *FileStorage) AddValue(key, value string) error {
 	return file.Close()
 }
 
-func (s *FileStorage) GetValue(key string) (string, error) {
-	if value, found := s.List[key]; found {
+func (s *FileStorage) GetValue(key, userId string) (string, error) {
+	if value, found := s.List[userId][key]; found {
 		return value, nil
 	}
 	return "", errors.New("storage didn't contains this key")
+}
+
+func (s *FileStorage) GetAllValues(userId string) ([]u.URLItem, error) {
+	var items []u.URLItem
+
+	if _, found := s.List[userId]; !found {
+		return items, errors.New("this user haven't got any urls")
+	}
+
+	for key, value := range s.List[userId] {
+		items = append(items, u.URLItem{ShortURL: key, OriginalURL: value})
+	}
+
+	return items, nil
 }

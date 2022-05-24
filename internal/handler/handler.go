@@ -13,7 +13,7 @@ import (
 
 type Handler struct {
 	service *service.Service
-	config *config.Config
+	config  *config.Config
 }
 
 type ShortenInput struct {
@@ -27,6 +27,7 @@ func NewHandler(service *service.Service, conf *config.Config) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	router.Use(CookieHandler())
 	router.Use(DecompressBody())
 	router.Use(gzip.Gzip(gzip.BestCompression))
 
@@ -36,6 +37,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	api := router.Group("/api")
 	{
 		api.POST("/shorten", h.CreateJSONShorten)
+
+		user := api.Group("user")
+		{
+			user.GET("urls", h.GetAllShortens)
+		}
 	}
 
 	return router
@@ -50,12 +56,14 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 		return
 	}
 
+	userId := GetUserId(c)
+
 	if err := json.Unmarshal(body, &input); err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	shortURL, err := h.service.AddURL(input.URL)
+	shortURL, err := h.service.AddURL(input.URL, userId)
 	if err != nil {
 		fmt.Println(3)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
@@ -75,7 +83,9 @@ func (h *Handler) GetShorten(c *gin.Context) {
 		return
 	}
 
-	url, err := h.service.GetURL(key)
+	userId := GetUserId(c)
+
+	url, err := h.service.GetURL(key, userId)
 	if err != nil {
 		errorResponse(c, http.StatusNotFound, err.Error())
 		return
@@ -92,13 +102,27 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 		return
 	}
 
-	shortURL, err := h.service.AddURL(string(body))
+	userId := GetUserId(c)
+
+	shortURL, err := h.service.AddURL(string(body), userId)
 	if err != nil {
-		fmt.Println(3)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.Header("content-type", "application/json")
 	c.String(http.StatusCreated, fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL))
+}
+
+func (h *Handler) GetAllShortens(c *gin.Context) {
+	userId := GetUserId(c)
+
+	items, err := h.service.GetAllURLS(userId)
+	if err != nil {
+		errorResponse(c, http.StatusNoContent, err.Error())
+		return
+	}
+
+	c.Header("content-type", "application/json")
+	c.JSON(http.StatusOK, items)
 }
