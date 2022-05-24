@@ -79,7 +79,7 @@ func CookieHandler() gin.HandlerFunc {
 			h.Write(id)
 			sign := h.Sum(nil)
 
-			c.SetCookie(IdentityKey, fmt.Sprintf("%x%x", id, sign), 3600, "/", "localhost", false, true)
+			c.SetCookie(IdentityKey, fmt.Sprintf("%x%x", id, sign), 3600, "/", "", false, true)
 			c.Set(IdentityKey, string(id))
 		}
 
