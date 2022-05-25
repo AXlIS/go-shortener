@@ -26,8 +26,8 @@ func (s *Service) AddURL(url, userId string) (string, error) {
 	return shortURL, nil
 }
 
-func (s *Service) GetURL(key, userId string) (string, error) {
-	url, err := s.storage.GetValue(key, userId)
+func (s *Service) GetURL(key string) (string, error) {
+	url, err := s.storage.GetValue(key)
 	if err != nil {
 		return "", err
 	}

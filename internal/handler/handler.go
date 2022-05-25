@@ -83,9 +83,7 @@ func (h *Handler) GetShorten(c *gin.Context) {
 		return
 	}
 
-	userId := GetUserId(c)
-
-	url, err := h.service.GetURL(key, userId)
+	url, err := h.service.GetURL(key)
 	if err != nil {
 		errorResponse(c, http.StatusNotFound, err.Error())
 		return

@@ -67,10 +67,13 @@ func (s *FileStorage) AddValue(key, value, userId string) error {
 	return file.Close()
 }
 
-func (s *FileStorage) GetValue(key, userId string) (string, error) {
-	if value, found := s.List[userId][key]; found {
-		return value, nil
+func (s *FileStorage) GetValue(key string) (string, error) {
+	for _, dict := range s.List {
+		if value, found := dict[key]; found {
+			return value, nil
+		}
 	}
+
 	return "", errors.New("storage didn't contains this key")
 }
 

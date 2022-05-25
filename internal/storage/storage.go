@@ -7,7 +7,7 @@ import (
 
 type URLWorker interface {
 	AddValue(key, value, userId string) error
-	GetValue(key, userId string) (string, error)
+	GetValue(key string) (string, error)
 	GetAllValues(userId string) ([]u.URLItem, error)
 }
 
@@ -31,10 +31,14 @@ func (s *Storage) AddValue(key, value, userId string) error {
 	return nil
 }
 
-func (s *Storage) GetValue(key, userId string) (string, error) {
-	if value, found := s.List[userId][key]; found {
-		return value, nil
+func (s *Storage) GetValue(key string) (string, error) {
+
+	for _, dict := range s.List {
+		if value, found := dict[key]; found {
+			return value, nil
+		}
 	}
+
 	return "", errors.New("the map didn't contains this key")
 }
 
