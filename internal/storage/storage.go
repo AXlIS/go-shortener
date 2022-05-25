@@ -2,7 +2,9 @@ package storage
 
 import (
 	"errors"
+	"fmt"
 	u "github.com/AXlIS/go-shortener"
+	"github.com/AXlIS/go-shortener/internal/config"
 )
 
 type URLWorker interface {
@@ -13,13 +15,15 @@ type URLWorker interface {
 
 type Storage struct {
 	URLWorker
-	List map[string]map[string]string
+	List   map[string]map[string]string
+	Config *config.Config
 }
 
 // NewStorage ...
-func NewStorage() *Storage {
+func NewStorage(config *config.Config) *Storage {
 	return &Storage{
-		List: make(map[string]map[string]string),
+		List:   make(map[string]map[string]string),
+		Config: config,
 	}
 }
 
@@ -50,7 +54,7 @@ func (s *Storage) GetAllValues(userId string) ([]u.URLItem, error) {
 	}
 
 	for key, value := range s.List[userId] {
-		items = append(items, u.URLItem{ShortURL: key, OriginalURL: value})
+		items = append(items, u.URLItem{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
 	}
 
 	return items, nil

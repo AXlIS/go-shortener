@@ -36,18 +36,19 @@ func main() {
 		err     error
 	)
 
+	conf := config.NewConfig(baseURL)
+
 	if filePath := config.GetEnv("FILE_STORAGE_PATH", fileStoragePath); filePath != "" {
-		storage, err = store.NewFileStorage(filePath)
+		storage, err = store.NewFileStorage(filePath, conf)
 
 		if err != nil {
 			log.Fatalf("error: %s", err.Error())
 		}
 	} else {
-		storage = store.NewStorage()
+		storage = store.NewStorage(conf)
 	}
 
 	services := service.NewService(storage)
-	conf := config.NewConfig(baseURL)
 	handlers := handler.NewHandler(services, conf)
 
 	s := new(server.Server)

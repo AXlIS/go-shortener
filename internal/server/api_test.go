@@ -3,8 +3,9 @@ package server
 import (
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/handler"
+	"github.com/AXlIS/go-shortener/internal/mocks"
 	"github.com/AXlIS/go-shortener/internal/service"
-	"github.com/AXlIS/go-shortener/internal/storage"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -19,18 +20,22 @@ type Want struct {
 }
 
 func TestServer_CreateJSONShorten(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := mocks.NewMockURLWorker(ctrl)
+	s.EXPECT().AddValue("KRJARhJf5S", "https://www.yandex.ru/", gomock.Any()).Return(nil)
+
 	tests := []struct {
 		name    string
 		request string
 		body    string
-		storage *storage.Storage
 		want    Want
 	}{
 		{
 			name:    "POST 201 OK test",
 			request: "/api/shorten",
 			body:    "{\"url\":\"https://www.yandex.ru/\"}",
-			storage: storage.NewStorage(),
 			want: Want{
 				code:     201,
 				response: "{\"result\":\"http://localhost:8080/KRJARhJf5S\"}",
@@ -38,9 +43,8 @@ func TestServer_CreateJSONShorten(t *testing.T) {
 		},
 	}
 
-	store := storage.NewStorage()
-	services := service.NewService(store)
 	conf := config.NewConfig("http://localhost:8080")
+	services := service.NewService(s)
 	handlers := handler.NewHandler(services, conf)
 
 	router := handlers.InitRoutes()
@@ -67,20 +71,21 @@ func TestServer_CreateJSONShorten(t *testing.T) {
 }
 
 func TestServer_GetShorten(t *testing.T) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := mocks.NewMockURLWorker(ctrl)
+	s.EXPECT().GetValue("VzGUU3fuyV").Return("https://www.yandex.ru/", nil)
+
 	tests := []struct {
 		name    string
 		request string
-		storage *storage.Storage
 		want    Want
 	}{
 		{
 			name:    "GET 200 url test",
 			request: "/VzGUU3fuyV",
-			storage: &storage.Storage{
-				List: map[string]string{
-					"VzGUU3fuyV": "https://www.yandex.ru/",
-				},
-			},
 			want: Want{
 				code: 307,
 			},
@@ -89,7 +94,7 @@ func TestServer_GetShorten(t *testing.T) {
 
 	for _, tt := range tests {
 
-		services := service.NewService(tt.storage)
+		services := service.NewService(s)
 		conf := config.NewConfig("http://localhost:8080")
 		handlers := handler.NewHandler(services, conf)
 
@@ -109,17 +114,22 @@ func TestServer_GetShorten(t *testing.T) {
 }
 
 func TestServer_CreateShorten(t *testing.T) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := mocks.NewMockURLWorker(ctrl)
+	s.EXPECT().AddValue("KRJARhJf5S", "https://www.yandex.ru/", gomock.Any()).Return(nil)
+
 	tests := []struct {
 		name    string
 		request string
 		body    string
-		storage *storage.Storage
 		want    Want
 	}{
 		{
 			name:    "POST 201 OK test",
 			request: "/",
-			storage: &storage.Storage{},
 			body:    "https://www.yandex.ru/",
 			want: Want{
 				code:     201,
@@ -128,9 +138,8 @@ func TestServer_CreateShorten(t *testing.T) {
 		},
 	}
 
-	store := storage.NewStorage()
-	services := service.NewService(store)
 	conf := config.NewConfig("http://localhost:8080")
+	services := service.NewService(s)
 	handlers := handler.NewHandler(services, conf)
 
 	router := handlers.InitRoutes()

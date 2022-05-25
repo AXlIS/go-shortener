@@ -3,7 +3,9 @@ package storage
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	u "github.com/AXlIS/go-shortener"
+	"github.com/AXlIS/go-shortener/internal/config"
 	"io"
 	"os"
 )
@@ -12,11 +14,12 @@ type FileStorage struct {
 	URLWorker
 	FilePath string
 	List     map[string]map[string]string
+	Config   *config.Config
 }
 
-func NewFileStorage(filePath string) (*FileStorage, error) {
+func NewFileStorage(filePath string, config *config.Config) (*FileStorage, error) {
 
-	var storage = &FileStorage{FilePath: filePath}
+	var storage = &FileStorage{FilePath: filePath, Config: config}
 
 	_ = os.Mkdir("/tmp", 0750)
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0777)
@@ -85,7 +88,7 @@ func (s *FileStorage) GetAllValues(userId string) ([]u.URLItem, error) {
 	}
 
 	for key, value := range s.List[userId] {
-		items = append(items, u.URLItem{ShortURL: key, OriginalURL: value})
+		items = append(items, u.URLItem{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
 	}
 
 	return items, nil

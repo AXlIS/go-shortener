@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	u "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/AXlIS/go-shortener/internal/utils"
@@ -20,7 +19,6 @@ func NewService(storage storage.URLWorker) *Service {
 func (s *Service) AddURL(url, userId string) (string, error) {
 	shortURL := utils.GenerateString(url)
 	if err := s.storage.AddValue(shortURL, url, userId); err != nil {
-		fmt.Println(5)
 		return "", err
 	}
 	return shortURL, nil
