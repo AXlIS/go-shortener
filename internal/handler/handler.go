@@ -38,9 +38,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api")
 	{
+		api.POST("/shorten", h.CreateJSONShorten)
 		shorten := api.Group("/shorten")
 		{
-			shorten.POST("/", h.CreateJSONShorten)
 			shorten.POST("/batch", h.CreateJSONShortenBatch)
 		}
 
