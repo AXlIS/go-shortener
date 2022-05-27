@@ -17,9 +17,9 @@ type DatabaseStorage struct {
 func NewDatabaseStorage(db *sqlx.DB, config *config.Config) *DatabaseStorage {
 	createTableQuery := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s ( 
 												id         SERIAL PRIMARY KEY,
-												user_id    VARCHAR(32) NOT NULL,
-												short_url  VARCHAR(32) NOT NULL,
-												base_url   VARCHAR(32) NOT NULL,
+												user_id    VARCHAR(128) NOT NULL,
+												short_url  VARCHAR(128) NOT NULL,
+												base_url   VARCHAR(128) NOT NULL,
                                                 created_at timestamp NOT NULL DEFAULT NOW(),
 	                                            UNIQUE (user_id, short_url)
                                            );`, urlsTable)
