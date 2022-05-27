@@ -34,6 +34,20 @@ func (m *MockURLWorker) EXPECT() *MockURLWorkerMockRecorder {
 	return m.recorder
 }
 
+// AddBatch mocks base method.
+func (m *MockURLWorker) AddBatch(arg0 []*url.ShortenBatchInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddBatch", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddBatch indicates an expected call of AddBatch.
+func (mr *MockURLWorkerMockRecorder) AddBatch(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBatch", reflect.TypeOf((*MockURLWorker)(nil).AddBatch), arg0)
+}
+
 // AddValue mocks base method.
 func (m *MockURLWorker) AddValue(arg0, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
