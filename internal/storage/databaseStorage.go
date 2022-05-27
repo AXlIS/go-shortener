@@ -4,7 +4,9 @@ import (
 	"fmt"
 	u "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
+	"github.com/jackc/pgerrcode"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"log"
 )
 
@@ -55,6 +57,13 @@ func (s *DatabaseStorage) AddValue(key, value, userId string) error {
 
 	addValueQuery := fmt.Sprintf(`INSERT INTO %s (user_id, short_url, base_url) VALUES ($1, $2, $3)`, urlsTable)
 	_, err = tx.Exec(addValueQuery, userId, fmt.Sprintf("%s/%s", s.config.BaseURL, key), value)
+
+	if err, ok := err.(*pq.Error); ok {
+		if err.Code == pgerrcode.UniqueViolation {
+			return err
+		}
+	}
+
 	if err != nil {
 		_ = tx.Rollback()
 		return err

@@ -6,6 +6,8 @@ import (
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/AXlIS/go-shortener/internal/utils"
+	"github.com/jackc/pgerrcode"
+	"github.com/lib/pq"
 )
 
 type Service struct {
@@ -22,9 +24,18 @@ func NewService(storage storage.URLWorker, config *config.Config) *Service {
 
 func (s *Service) AddURL(url, userId string) (string, error) {
 	shortURL := utils.GenerateString(url)
-	if err := s.storage.AddValue(shortURL, url, userId); err != nil {
+	err := s.storage.AddValue(shortURL, url, userId)
+
+	if err, ok := err.(*pq.Error); ok {
+		if err.Code == pgerrcode.UniqueViolation {
+			return shortURL, err
+		}
+	}
+
+	if err != nil {
 		return "", err
 	}
+
 	return shortURL, nil
 }
 

@@ -8,6 +8,8 @@ import (
 	"github.com/AXlIS/go-shortener/internal/service"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgerrcode"
+	"github.com/lib/pq"
 	"io"
 	"net/http"
 )
@@ -39,6 +41,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	api := router.Group("/api")
 	{
 		api.POST("/shorten", h.CreateJSONShorten)
+
 		shorten := api.Group("/shorten")
 		{
 			shorten.POST("/batch", h.CreateJSONShortenBatch)
@@ -70,13 +73,22 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 	}
 
 	shortURL, err := h.service.AddURL(input.URL, userId)
+
+	c.Header("content-type", "application/json")
+	if err, ok := err.(*pq.Error); ok {
+		if err.Code == pgerrcode.UniqueViolation {
+			c.JSON(http.StatusConflict, map[string]string{
+				"result": fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL),
+			})
+			return
+		}
+	}
+
 	if err != nil {
-		fmt.Println(3)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.Header("content-type", "application/json")
 	c.JSON(http.StatusCreated, map[string]string{
 		"result": fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL),
 	})
@@ -140,12 +152,19 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 	userId := GetUserId(c)
 
 	shortURL, err := h.service.AddURL(string(body), userId)
+
+	if err, ok := err.(*pq.Error); ok {
+		if err.Code == pgerrcode.UniqueViolation {
+			c.String(http.StatusConflict, fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL))
+			return
+		}
+	}
+
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.Header("content-type", "application/json")
 	c.String(http.StatusCreated, fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL))
 }
 
