@@ -73,3 +73,11 @@ func (s *DatabaseStorage) GetAllValues(userId string) ([]u.URLItem, error) {
 
 	return URLS, nil
 }
+
+func (s *DatabaseStorage) Ping() (bool, error) {
+	err := s.db.Ping()
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

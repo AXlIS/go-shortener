@@ -33,6 +33,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	router.POST("/", h.CreateShorten)
 	router.GET("/:id", h.GetShorten)
+	router.GET("/ping", h.GetPing)
 
 	api := router.Group("/api")
 	{
@@ -123,4 +124,13 @@ func (h *Handler) GetAllShortens(c *gin.Context) {
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusOK, items)
+}
+
+func (h *Handler) GetPing(c *gin.Context) {
+	ping, err := h.service.Ping()
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, map[string]bool{"active": ping})
 }

@@ -37,3 +37,8 @@ func (s *Service) GetAllURLS(userId string) ([]u.URLItem, error) {
 	urls, err := s.storage.GetAllValues(userId)
 	return urls, err
 }
+
+func (s *Service) Ping() (bool, error) {
+	ping, err := s.storage.Ping()
+	return ping, err
+}

@@ -11,6 +11,7 @@ type URLWorker interface {
 	AddValue(key, value, userId string) error
 	GetValue(key string) (string, error)
 	GetAllValues(userId string) ([]u.URLItem, error)
+	Ping() (bool, error)
 }
 
 type Storage struct {
@@ -58,4 +59,8 @@ func (s *Storage) GetAllValues(userId string) ([]u.URLItem, error) {
 	}
 
 	return items, nil
+}
+
+func (s *Storage) Ping() (bool, error) {
+	return false, errors.New("storage in memory is active")
 }

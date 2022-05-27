@@ -93,3 +93,7 @@ func (s *FileStorage) GetAllValues(userId string) ([]u.URLItem, error) {
 
 	return items, nil
 }
+
+func (s *FileStorage) Ping() (bool, error) {
+	return false, errors.New("storage in file is active")
+}
