@@ -54,13 +54,27 @@ func (s *DatabaseStorage) AddValue(key, value, userId string) error {
 	}
 
 	addValueQuery := fmt.Sprintf(`INSERT INTO %s (user_id, short_url, base_url) VALUES ($1, $2, $3)`, urlsTable)
-	_, err = s.db.Exec(addValueQuery, userId, fmt.Sprintf("%s/%s", s.config.BaseURL, key), value)
+	_, err = tx.Exec(addValueQuery, userId, fmt.Sprintf("%s/%s", s.config.BaseURL, key), value)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
 	}
 
 	return tx.Commit()
+}
+
+func (s *DatabaseStorage) AddBatch(input []*u.ShortenBatchInput) error {
+	for _, item := range input {
+		item.ShortenURL = fmt.Sprintf("%s/%s", s.config.BaseURL, item.ShortenURL)
+	}
+
+	insertQuery := fmt.Sprintf(`INSERT INTO %s (user_id, short_url, base_url) 
+                                      VALUES (:user_id, :short_url, :base_url)`, urlsTable)
+	if _, err := s.db.NamedExec(insertQuery, input); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *DatabaseStorage) GetAllValues(userId string) ([]u.URLItem, error) {

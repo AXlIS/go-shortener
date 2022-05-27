@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	u "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/service"
 	"github.com/gin-contrib/gzip"
@@ -37,7 +38,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api")
 	{
-		api.POST("/shorten", h.CreateJSONShorten)
+		shorten := api.Group("/shorten")
+		{
+			shorten.POST("/", h.CreateJSONShorten)
+			shorten.POST("/batch", h.CreateJSONShortenBatch)
+		}
 
 		user := api.Group("user")
 		{
@@ -75,6 +80,37 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 	c.JSON(http.StatusCreated, map[string]string{
 		"result": fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL),
 	})
+}
+
+func (h *Handler) CreateJSONShortenBatch(c *gin.Context) {
+	var input []*u.ShortenBatchInput
+
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(body, &input); err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(input) == 0 {
+		errorResponse(c, http.StatusBadRequest, "the list is empty")
+		return
+	}
+
+	userId := GetUserId(c)
+
+	urls, err := h.service.AddBatchURL(input, userId)
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Header("content-type", "application/json")
+	c.JSON(http.StatusCreated, urls)
 }
 
 func (h *Handler) GetShorten(c *gin.Context) {

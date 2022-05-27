@@ -9,6 +9,7 @@ import (
 
 type URLWorker interface {
 	AddValue(key, value, userId string) error
+	AddBatch(input []*u.ShortenBatchInput) error
 	GetValue(key string) (string, error)
 	GetAllValues(userId string) ([]u.URLItem, error)
 	Ping() (bool, error)
@@ -33,6 +34,19 @@ func (s *Storage) AddValue(key, value, userId string) error {
 		s.List[userId] = make(map[string]string)
 	}
 	s.List[userId][key] = value
+	return nil
+}
+
+func (s *Storage) AddBatch(input []*u.ShortenBatchInput) error {
+
+	if _, found := s.List[input[0].UserID]; !found {
+		s.List[input[0].UserID] = make(map[string]string)
+	}
+
+	for _, item := range input {
+		s.List[item.UserID][item.ShortenURL] = item.OriginalURL
+	}
+
 	return nil
 }
 

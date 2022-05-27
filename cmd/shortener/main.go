@@ -58,7 +58,7 @@ func main() {
 		storage = store.NewStorage(conf)
 	}
 
-	services := service.NewService(storage)
+	services := service.NewService(storage, conf)
 	handlers := handler.NewHandler(services, conf)
 
 	s := new(server.Server)

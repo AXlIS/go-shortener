@@ -70,6 +70,34 @@ func (s *FileStorage) AddValue(key, value, userId string) error {
 	return file.Close()
 }
 
+func (s *FileStorage) AddBatch(input []*u.ShortenBatchInput) error {
+
+	if _, found := s.List[input[0].UserID]; !found {
+		s.List[input[0].UserID] = make(map[string]string)
+	}
+
+	for _, item := range input {
+		s.List[item.UserID][item.ShortenURL] = item.OriginalURL
+	}
+
+	file, err := os.OpenFile(s.FilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return err
+	}
+
+	data, err := json.MarshalIndent(s.List, "", "	")
+	if err != nil {
+		return err
+	}
+
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+
+	return file.Close()
+}
+
 func (s *FileStorage) GetValue(key string) (string, error) {
 	for _, dict := range s.List {
 		if value, found := dict[key]; found {
