@@ -77,3 +77,18 @@ func (mr *MockURLWorkerMockRecorder) GetValue(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValue", reflect.TypeOf((*MockURLWorker)(nil).GetValue), arg0)
 }
+
+// Ping mocks base method.
+func (m *MockURLWorker) Ping() (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Ping")
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Ping indicates an expected call of Ping.
+func (mr *MockURLWorkerMockRecorder) Ping() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockURLWorker)(nil).Ping))
+}
