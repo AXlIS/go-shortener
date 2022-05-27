@@ -65,14 +65,14 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 		return
 	}
 
-	userId := GetUserId(c)
+	userID := GetUserID(c)
 
 	if err := json.Unmarshal(body, &input); err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	shortURL, err := h.service.AddURL(input.URL, userId)
+	shortURL, err := h.service.AddURL(input.URL, userID)
 
 	c.Header("content-type", "application/json")
 	if err, ok := err.(*pq.Error); ok {
@@ -113,9 +113,9 @@ func (h *Handler) CreateJSONShortenBatch(c *gin.Context) {
 		return
 	}
 
-	userId := GetUserId(c)
+	userID := GetUserID(c)
 
-	urls, err := h.service.AddBatchURL(input, userId)
+	urls, err := h.service.AddBatchURL(input, userID)
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -149,9 +149,9 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 		return
 	}
 
-	userId := GetUserId(c)
+	userID := GetUserID(c)
 
-	shortURL, err := h.service.AddURL(string(body), userId)
+	shortURL, err := h.service.AddURL(string(body), userID)
 
 	if err, ok := err.(*pq.Error); ok {
 		if err.Code == pgerrcode.UniqueViolation {
@@ -169,9 +169,9 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 }
 
 func (h *Handler) GetAllShortens(c *gin.Context) {
-	userId := GetUserId(c)
+	userID := GetUserID(c)
 
-	items, err := h.service.GetAllURLS(userId)
+	items, err := h.service.GetAllURLS(userID)
 	if err != nil {
 		errorResponse(c, http.StatusNoContent, err.Error())
 		return

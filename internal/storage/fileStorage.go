@@ -45,12 +45,12 @@ func NewFileStorage(filePath string, config *config.Config) (*FileStorage, error
 	return storage, nil
 }
 
-func (s *FileStorage) AddValue(key, value, userId string) error {
+func (s *FileStorage) AddValue(key, value, userID string) error {
 
-	if _, found := s.List[userId]; !found {
-		s.List[userId] = make(map[string]string)
+	if _, found := s.List[userID]; !found {
+		s.List[userID] = make(map[string]string)
 	}
-	s.List[userId][key] = value
+	s.List[userID][key] = value
 
 	file, err := os.OpenFile(s.FilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
@@ -108,14 +108,14 @@ func (s *FileStorage) GetValue(key string) (string, error) {
 	return "", errors.New("storage didn't contains this key")
 }
 
-func (s *FileStorage) GetAllValues(userId string) ([]u.URLItem, error) {
+func (s *FileStorage) GetAllValues(userID string) ([]u.URLItem, error) {
 	var items []u.URLItem
 
-	if _, found := s.List[userId]; !found {
+	if _, found := s.List[userID]; !found {
 		return items, errors.New("this user haven't got any urls")
 	}
 
-	for key, value := range s.List[userId] {
+	for key, value := range s.List[userID] {
 		items = append(items, u.URLItem{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
 	}
 

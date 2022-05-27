@@ -22,9 +22,9 @@ func NewService(storage storage.URLWorker, config *config.Config) *Service {
 	}
 }
 
-func (s *Service) AddURL(url, userId string) (string, error) {
+func (s *Service) AddURL(url, userID string) (string, error) {
 	shortURL := utils.GenerateString(url)
-	err := s.storage.AddValue(shortURL, url, userId)
+	err := s.storage.AddValue(shortURL, url, userID)
 
 	if err, ok := err.(*pq.Error); ok {
 		if err.Code == pgerrcode.UniqueViolation {
@@ -48,17 +48,17 @@ func (s *Service) GetURL(key string) (string, error) {
 	return url, nil
 }
 
-func (s *Service) GetAllURLS(userId string) ([]u.URLItem, error) {
-	urls, err := s.storage.GetAllValues(userId)
+func (s *Service) GetAllURLS(userID string) ([]u.URLItem, error) {
+	urls, err := s.storage.GetAllValues(userID)
 	return urls, err
 }
 
-func (s *Service) AddBatchURL(urls []*u.ShortenBatchInput, userId string) ([]u.ShortenBatchResponse, error) {
+func (s *Service) AddBatchURL(urls []*u.ShortenBatchInput, userID string) ([]u.ShortenBatchResponse, error) {
 	var shortenURLS []u.ShortenBatchResponse
 
 	for _, item := range urls {
 		shortURL := utils.GenerateString(item.OriginalURL)
-		item.ShortenURL, item.UserID = shortURL, userId
+		item.ShortenURL, item.UserID = shortURL, userID
 		shortenURLS = append(shortenURLS, u.ShortenBatchResponse{
 			CorrelationID: item.CorrelationID,
 			ShortURL:      fmt.Sprintf("%s/%s", s.config.BaseURL, shortURL),

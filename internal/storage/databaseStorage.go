@@ -49,14 +49,14 @@ func (s *DatabaseStorage) GetValue(key string) (string, error) {
 	return URL, nil
 }
 
-func (s *DatabaseStorage) AddValue(key, value, userId string) error {
+func (s *DatabaseStorage) AddValue(key, value, userID string) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
 
 	addValueQuery := fmt.Sprintf(`INSERT INTO %s (user_id, short_url, base_url) VALUES ($1, $2, $3)`, urlsTable)
-	_, err = tx.Exec(addValueQuery, userId, fmt.Sprintf("%s/%s", s.config.BaseURL, key), value)
+	_, err = tx.Exec(addValueQuery, userID, fmt.Sprintf("%s/%s", s.config.BaseURL, key), value)
 
 	if err, ok := err.(*pq.Error); ok {
 		if err.Code == pgerrcode.UniqueViolation {
@@ -86,11 +86,11 @@ func (s *DatabaseStorage) AddBatch(input []*u.ShortenBatchInput) error {
 	return nil
 }
 
-func (s *DatabaseStorage) GetAllValues(userId string) ([]u.URLItem, error) {
+func (s *DatabaseStorage) GetAllValues(userID string) ([]u.URLItem, error) {
 	var URLS []u.URLItem
 	query := fmt.Sprintf(`SELECT short_url, base_url FROM %s WHERE user_id = $1`, urlsTable)
 
-	if err := s.db.Select(&URLS, query, userId); err != nil {
+	if err := s.db.Select(&URLS, query, userID); err != nil {
 		return nil, err
 	}
 

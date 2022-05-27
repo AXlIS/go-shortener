@@ -8,10 +8,10 @@ import (
 )
 
 type URLWorker interface {
-	AddValue(key, value, userId string) error
+	AddValue(key, value, userID string) error
 	AddBatch(input []*u.ShortenBatchInput) error
 	GetValue(key string) (string, error)
-	GetAllValues(userId string) ([]u.URLItem, error)
+	GetAllValues(userID string) ([]u.URLItem, error)
 	Ping() (bool, error)
 }
 
@@ -29,11 +29,11 @@ func NewStorage(config *config.Config) *Storage {
 	}
 }
 
-func (s *Storage) AddValue(key, value, userId string) error {
-	if _, found := s.List[userId]; !found {
-		s.List[userId] = make(map[string]string)
+func (s *Storage) AddValue(key, value, userID string) error {
+	if _, found := s.List[userID]; !found {
+		s.List[userID] = make(map[string]string)
 	}
-	s.List[userId][key] = value
+	s.List[userID][key] = value
 	return nil
 }
 
@@ -61,14 +61,14 @@ func (s *Storage) GetValue(key string) (string, error) {
 	return "", errors.New("the map didn't contains this key")
 }
 
-func (s *Storage) GetAllValues(userId string) ([]u.URLItem, error) {
+func (s *Storage) GetAllValues(userID string) ([]u.URLItem, error) {
 	var items []u.URLItem
 
-	if _, found := s.List[userId]; !found {
+	if _, found := s.List[userID]; !found {
 		return items, errors.New("this user haven't got any urls")
 	}
 
-	for key, value := range s.List[userId] {
+	for key, value := range s.List[userID] {
 		items = append(items, u.URLItem{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
 	}
 
