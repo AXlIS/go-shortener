@@ -35,7 +35,7 @@ func (m *MockURLWorker) EXPECT() *MockURLWorkerMockRecorder {
 }
 
 // AddBatch mocks base method.
-func (m *MockURLWorker) AddBatch(arg0 []*url.ShortenBatchInput) error {
+func (m *MockURLWorker) AddBatch(arg0 []*urls.ShortenBatchInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddBatch", arg0)
 	ret0, _ := ret[0].(error)
