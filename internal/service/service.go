@@ -48,13 +48,13 @@ func (s *Service) GetURL(key string) (string, error) {
 	return url, nil
 }
 
-func (s *Service) GetAllURLS(userID string) ([]u.URLItem, error) {
+func (s *Service) GetAllURLS(userID string) ([]u.Item, error) {
 	urls, err := s.storage.GetAllValues(userID)
 	return urls, err
 }
 
 func (s *Service) AddBatchURL(urls []*u.ShortenBatchInput, userID string) ([]u.ShortenBatchResponse, error) {
-	var shortenURLS []u.ShortenBatchResponse
+	shortenURLS := make([]u.ShortenBatchResponse, 0, len(urls))
 
 	for _, item := range urls {
 		shortURL := utils.GenerateString(item.OriginalURL)

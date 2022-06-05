@@ -3,20 +3,19 @@ package storage
 import (
 	"errors"
 	"fmt"
-	u "github.com/AXlIS/go-shortener"
+	urls "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 )
 
 type URLWorker interface {
 	AddValue(key, value, userID string) error
-	AddBatch(input []*u.ShortenBatchInput) error
+	AddBatch(input []*urls.ShortenBatchInput) error
 	GetValue(key string) (string, error)
-	GetAllValues(userID string) ([]u.URLItem, error)
+	GetAllValues(userID string) ([]urls.Item, error)
 	Ping() (bool, error)
 }
 
 type Storage struct {
-	URLWorker
 	List   map[string]map[string]string
 	Config *config.Config
 }
@@ -37,7 +36,7 @@ func (s *Storage) AddValue(key, value, userID string) error {
 	return nil
 }
 
-func (s *Storage) AddBatch(input []*u.ShortenBatchInput) error {
+func (s *Storage) AddBatch(input []*urls.ShortenBatchInput) error {
 
 	if _, found := s.List[input[0].UserID]; !found {
 		s.List[input[0].UserID] = make(map[string]string)
@@ -61,15 +60,15 @@ func (s *Storage) GetValue(key string) (string, error) {
 	return "", errors.New("the map didn't contains this key")
 }
 
-func (s *Storage) GetAllValues(userID string) ([]u.URLItem, error) {
-	var items []u.URLItem
+func (s *Storage) GetAllValues(userID string) ([]urls.Item, error) {
+	var items []urls.Item
 
 	if _, found := s.List[userID]; !found {
 		return items, errors.New("this user haven't got any urls")
 	}
 
 	for key, value := range s.List[userID] {
-		items = append(items, u.URLItem{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
+		items = append(items, urls.Item{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
 	}
 
 	return items, nil

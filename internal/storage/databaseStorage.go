@@ -2,7 +2,7 @@ package storage
 
 import (
 	"fmt"
-	u "github.com/AXlIS/go-shortener"
+	urls "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/jackc/pgerrcode"
 	"github.com/jmoiron/sqlx"
@@ -11,7 +11,6 @@ import (
 )
 
 type DatabaseStorage struct {
-	URLWorker
 	config *config.Config
 	db     *sqlx.DB
 }
@@ -65,14 +64,15 @@ func (s *DatabaseStorage) AddValue(key, value, userID string) error {
 	}
 
 	if err != nil {
-		_ = tx.Rollback()
+		err = tx.Rollback()
+		log.Printf("Error: %s", err.Error())
 		return err
 	}
 
 	return tx.Commit()
 }
 
-func (s *DatabaseStorage) AddBatch(input []*u.ShortenBatchInput) error {
+func (s *DatabaseStorage) AddBatch(input []*urls.ShortenBatchInput) error {
 	for _, item := range input {
 		item.ShortenURL = fmt.Sprintf("%s/%s", s.config.BaseURL, item.ShortenURL)
 	}
@@ -86,8 +86,8 @@ func (s *DatabaseStorage) AddBatch(input []*u.ShortenBatchInput) error {
 	return nil
 }
 
-func (s *DatabaseStorage) GetAllValues(userID string) ([]u.URLItem, error) {
-	var URLS []u.URLItem
+func (s *DatabaseStorage) GetAllValues(userID string) ([]urls.Item, error) {
+	var URLS []urls.Item
 	query := fmt.Sprintf(`SELECT short_url, base_url FROM %s WHERE user_id = $1`, urlsTable)
 
 	if err := s.db.Select(&URLS, query, userID); err != nil {

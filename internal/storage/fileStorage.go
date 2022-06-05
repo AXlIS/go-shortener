@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	u "github.com/AXlIS/go-shortener"
+	urls "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"io"
 	"os"
 )
 
 type FileStorage struct {
-	URLWorker
 	FilePath string
 	List     map[string]map[string]string
 	Config   *config.Config
@@ -70,7 +69,7 @@ func (s *FileStorage) AddValue(key, value, userID string) error {
 	return file.Close()
 }
 
-func (s *FileStorage) AddBatch(input []*u.ShortenBatchInput) error {
+func (s *FileStorage) AddBatch(input []*urls.ShortenBatchInput) error {
 
 	if _, found := s.List[input[0].UserID]; !found {
 		s.List[input[0].UserID] = make(map[string]string)
@@ -108,15 +107,15 @@ func (s *FileStorage) GetValue(key string) (string, error) {
 	return "", errors.New("storage didn't contains this key")
 }
 
-func (s *FileStorage) GetAllValues(userID string) ([]u.URLItem, error) {
-	var items []u.URLItem
+func (s *FileStorage) GetAllValues(userID string) ([]urls.Item, error) {
+	items := make([]urls.Item, 0, len(s.List[userID]))
 
 	if _, found := s.List[userID]; !found {
 		return items, errors.New("this user haven't got any urls")
 	}
 
 	for key, value := range s.List[userID] {
-		items = append(items, u.URLItem{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
+		items = append(items, urls.Item{ShortURL: fmt.Sprintf("%s/%s", s.Config.BaseURL, key), OriginalURL: value})
 	}
 
 	return items, nil
