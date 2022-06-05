@@ -34,6 +34,20 @@ func (m *MockURLWorker) EXPECT() *MockURLWorkerMockRecorder {
 	return m.recorder
 }
 
+// AddBatch mocks base method.
+func (m *MockURLWorker) AddBatch(arg0 []*url.ShortenBatchInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddBatch", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddBatch indicates an expected call of AddBatch.
+func (mr *MockURLWorkerMockRecorder) AddBatch(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBatch", reflect.TypeOf((*MockURLWorker)(nil).AddBatch), arg0)
+}
+
 // AddValue mocks base method.
 func (m *MockURLWorker) AddValue(arg0, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
@@ -76,4 +90,19 @@ func (m *MockURLWorker) GetValue(arg0 string) (string, error) {
 func (mr *MockURLWorkerMockRecorder) GetValue(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValue", reflect.TypeOf((*MockURLWorker)(nil).GetValue), arg0)
+}
+
+// Ping mocks base method.
+func (m *MockURLWorker) Ping() (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Ping")
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Ping indicates an expected call of Ping.
+func (mr *MockURLWorkerMockRecorder) Ping() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockURLWorker)(nil).Ping))
 }

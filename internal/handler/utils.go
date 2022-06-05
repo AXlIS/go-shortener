@@ -15,7 +15,7 @@ func GenerateRandom(size int) ([]byte, error) {
 	return b, nil
 }
 
-func GetUserId(c *gin.Context) string {
+func GetUserID(c *gin.Context) string {
 	id := c.GetString(IdentityKey)
 
 	return utils.GenerateString(id)

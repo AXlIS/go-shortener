@@ -3,10 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	u "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/service"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgerrcode"
+	"github.com/lib/pq"
 	"io"
 	"net/http"
 )
@@ -33,10 +36,16 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	router.POST("/", h.CreateShorten)
 	router.GET("/:id", h.GetShorten)
+	router.GET("/ping", h.GetPing)
 
 	api := router.Group("/api")
 	{
 		api.POST("/shorten", h.CreateJSONShorten)
+
+		shorten := api.Group("/shorten")
+		{
+			shorten.POST("/batch", h.CreateJSONShortenBatch)
+		}
 
 		user := api.Group("user")
 		{
@@ -56,24 +65,64 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 		return
 	}
 
-	userId := GetUserId(c)
+	userID := GetUserID(c)
 
 	if err := json.Unmarshal(body, &input); err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	shortURL, err := h.service.AddURL(input.URL, userId)
+	shortURL, err := h.service.AddURL(input.URL, userID)
+
+	c.Header("content-type", "application/json")
+	if err, ok := err.(*pq.Error); ok {
+		if err.Code == pgerrcode.UniqueViolation {
+			c.JSON(http.StatusConflict, map[string]string{
+				"result": fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL),
+			})
+			return
+		}
+	}
+
 	if err != nil {
-		fmt.Println(3)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusCreated, map[string]string{
+		"result": fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL),
+	})
+}
+
+func (h *Handler) CreateJSONShortenBatch(c *gin.Context) {
+	var input []*u.ShortenBatchInput
+
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(body, &input); err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(input) == 0 {
+		errorResponse(c, http.StatusBadRequest, "the list is empty")
+		return
+	}
+
+	userID := GetUserID(c)
+
+	urls, err := h.service.AddBatchURL(input, userID)
+	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.Header("content-type", "application/json")
-	c.JSON(http.StatusCreated, map[string]string{
-		"result": fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL),
-	})
+	c.JSON(http.StatusCreated, urls)
 }
 
 func (h *Handler) GetShorten(c *gin.Context) {
@@ -100,22 +149,29 @@ func (h *Handler) CreateShorten(c *gin.Context) {
 		return
 	}
 
-	userId := GetUserId(c)
+	userID := GetUserID(c)
 
-	shortURL, err := h.service.AddURL(string(body), userId)
+	shortURL, err := h.service.AddURL(string(body), userID)
+
+	if err, ok := err.(*pq.Error); ok {
+		if err.Code == pgerrcode.UniqueViolation {
+			c.String(http.StatusConflict, fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL))
+			return
+		}
+	}
+
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.Header("content-type", "application/json")
 	c.String(http.StatusCreated, fmt.Sprintf("%s/%s", h.config.BaseURL, shortURL))
 }
 
 func (h *Handler) GetAllShortens(c *gin.Context) {
-	userId := GetUserId(c)
+	userID := GetUserID(c)
 
-	items, err := h.service.GetAllURLS(userId)
+	items, err := h.service.GetAllURLS(userID)
 	if err != nil {
 		errorResponse(c, http.StatusNoContent, err.Error())
 		return
@@ -123,4 +179,13 @@ func (h *Handler) GetAllShortens(c *gin.Context) {
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusOK, items)
+}
+
+func (h *Handler) GetPing(c *gin.Context) {
+	ping, err := h.service.Ping()
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, map[string]bool{"active": ping})
 }

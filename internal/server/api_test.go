@@ -44,7 +44,7 @@ func TestServer_CreateJSONShorten(t *testing.T) {
 	}
 
 	conf := config.NewConfig("http://localhost:8080")
-	services := service.NewService(s)
+	services := service.NewService(s, conf)
 	handlers := handler.NewHandler(services, conf)
 
 	router := handlers.InitRoutes()
@@ -93,9 +93,8 @@ func TestServer_GetShorten(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-
-		services := service.NewService(s)
 		conf := config.NewConfig("http://localhost:8080")
+		services := service.NewService(s, conf)
 		handlers := handler.NewHandler(services, conf)
 
 		router := handlers.InitRoutes()
@@ -139,7 +138,7 @@ func TestServer_CreateShorten(t *testing.T) {
 	}
 
 	conf := config.NewConfig("http://localhost:8080")
-	services := service.NewService(s)
+	services := service.NewService(s, conf)
 	handlers := handler.NewHandler(services, conf)
 
 	router := handlers.InitRoutes()

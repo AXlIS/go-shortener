@@ -8,11 +8,12 @@ import (
 	"github.com/AXlIS/go-shortener/internal/service"
 	store "github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"log"
 )
 
 var (
-	fileStoragePath, serverAddress, baseURL string
+	fileStoragePath, serverAddress, baseURL, databaseDsn string
 )
 
 func init() {
@@ -20,9 +21,10 @@ func init() {
 		log.Fatalf("Error loading env variables: %s", err.Error())
 	}
 
-	flag.StringVar(&fileStoragePath, "f", "storage.json", "path to file")
+	flag.StringVar(&fileStoragePath, "f", "", "path to file")
 	flag.StringVar(&serverAddress, "a", ":8080", "port")
 	flag.StringVar(&baseURL, "b", "http://localhost:8080", "base url")
+	flag.StringVar(&databaseDsn, "d", "", "database address")
 	flag.Parse()
 
 	if path := config.GetEnv("BASE_URL", ""); path != "" {
@@ -38,7 +40,15 @@ func main() {
 
 	conf := config.NewConfig(baseURL)
 
-	if filePath := config.GetEnv("FILE_STORAGE_PATH", fileStoragePath); filePath != "" {
+	if databasePath := config.GetEnv("DATABASE_DSN", databaseDsn); databasePath != "" {
+		db, err := store.NewPostgresDB(databasePath)
+		if err != nil {
+			log.Fatalf("faild to initialize db: %s", err.Error())
+		}
+
+		storage = store.NewDatabaseStorage(db, conf)
+
+	} else if filePath := config.GetEnv("FILE_STORAGE_PATH", fileStoragePath); filePath != "" {
 		storage, err = store.NewFileStorage(filePath, conf)
 
 		if err != nil {
@@ -48,7 +58,7 @@ func main() {
 		storage = store.NewStorage(conf)
 	}
 
-	services := service.NewService(storage)
+	services := service.NewService(storage, conf)
 	handlers := handler.NewHandler(services, conf)
 
 	s := new(server.Server)

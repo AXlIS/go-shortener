@@ -17,7 +17,7 @@ var (
 )
 
 const (
-	IdLength    = 6
+	IDLength    = 6
 	IdentityKey = "userId"
 )
 
@@ -50,11 +50,11 @@ func checkCookie(c *gin.Context) (bool, error) {
 	}
 
 	h := hmac.New(sha256.New, secretKey)
-	h.Write(data[:IdLength])
+	h.Write(data[:IDLength])
 	sign := h.Sum(nil)
 
-	if hmac.Equal(data[IdLength:], sign) {
-		c.Set(IdentityKey, string(data[:IdLength]))
+	if hmac.Equal(data[IDLength:], sign) {
+		c.Set(IdentityKey, string(data[:IDLength]))
 		return true, nil
 	}
 
@@ -70,7 +70,7 @@ func CookieHandler() gin.HandlerFunc {
 		}
 
 		if !cookieIsCorrect {
-			id, err := GenerateRandom(IdLength)
+			id, err := GenerateRandom(IDLength)
 			if err != nil {
 				errorResponse(c, http.StatusInternalServerError, err.Error())
 			}
