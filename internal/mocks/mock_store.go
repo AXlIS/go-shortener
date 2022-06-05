@@ -7,7 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	url "github.com/AXlIS/go-shortener"
+	urls "github.com/AXlIS/go-shortener"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -63,10 +63,10 @@ func (mr *MockURLWorkerMockRecorder) AddValue(arg0, arg1, arg2 interface{}) *gom
 }
 
 // GetAllValues mocks base method.
-func (m *MockURLWorker) GetAllValues(arg0 string) ([]url.URLItem, error) {
+func (m *MockURLWorker) GetAllValues(arg0 string) ([]urls.Item, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllValues", arg0)
-	ret0, _ := ret[0].([]url.URLItem)
+	ret0, _ := ret[0].([]urls.Item)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
