@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
 	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -50,6 +51,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		user := api.Group("user")
 		{
 			user.GET("urls", h.GetAllShortens)
+			user.DELETE("urls", h.DeleteShortens)
 		}
 	}
 
@@ -138,6 +140,12 @@ func (h *Handler) GetShorten(c *gin.Context) {
 		return
 	}
 
+	if url == "" {
+		c.Status(http.StatusGone)
+		return
+
+	}
+
 	c.Header("Location", url)
 	c.Status(http.StatusTemporaryRedirect)
 }
@@ -179,6 +187,27 @@ func (h *Handler) GetAllShortens(c *gin.Context) {
 
 	c.Header("content-type", "application/json")
 	c.JSON(http.StatusOK, items)
+}
+
+func (h *Handler) DeleteShortens(c *gin.Context) {
+	userID := GetUserID(c)
+
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var input []string
+	if err := json.Unmarshal(body, &input); err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	h.service.DeleteURLS(input, userID)
+
+	c.Header("content-type", "application/json")
+	c.Status(http.StatusAccepted)
 }
 
 func (h *Handler) GetPing(c *gin.Context) {

@@ -10,9 +10,17 @@ import (
 	"log"
 )
 
+const maxCountValues = 100
+
 type DatabaseStorage struct {
-	config *config.Config
-	db     *sqlx.DB
+	config  *config.Config
+	db      *sqlx.DB
+	channel chan toDelete
+}
+
+type toDelete struct {
+	User   string
+	Shorts []string
 }
 
 func NewDatabaseStorage(db *sqlx.DB, config *config.Config) *DatabaseStorage {
@@ -21,7 +29,8 @@ func NewDatabaseStorage(db *sqlx.DB, config *config.Config) *DatabaseStorage {
 												user_id    VARCHAR(32) NOT NULL,
 												short_url  VARCHAR(32) NOT NULL,
 												base_url   VARCHAR(255) NOT NULL,
-                                                created_at timestamp NOT NULL DEFAULT NOW(),
+                                                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+												is_deleted BOOLEAN DEFAULT false NOT NULL,
 	                                            UNIQUE (user_id, short_url)
                                            );`, urlsTable)
 	_, err := db.Exec(createTableQuery)
@@ -29,20 +38,66 @@ func NewDatabaseStorage(db *sqlx.DB, config *config.Config) *DatabaseStorage {
 		log.Fatalf("create table error: %s", err.Error())
 	}
 
-	return &DatabaseStorage{
-		db:     db,
-		config: config,
+	ch := make(chan toDelete)
+
+	storage := DatabaseStorage{
+		db:      db,
+		config:  config,
+		channel: ch,
+	}
+
+	go storage.AsyncUpdate()
+
+	return &storage
+}
+
+func (s *DatabaseStorage) AsyncUpdate() {
+	query := fmt.Sprintf("UPDATE %s SET is_deleted = TRUE WHERE short_url = any ($1) AND user_id=$2;", urlsTable)
+
+	for {
+		task := <-s.channel
+		shorts := task.Shorts
+
+		for limit := len(shorts); limit > 0; limit = len(shorts) {
+			if limit > maxCountValues {
+				limit = maxCountValues
+			}
+
+			deleteBatch := shorts[:limit]
+			shorts = shorts[limit:]
+
+			if _, err := s.db.Exec(query, pq.Array(deleteBatch), task.User); err != nil {
+				log.Printf("AsyncUpdate: error: %s", err.Error())
+			}
+
+		}
+	}
+
+}
+
+func (s *DatabaseStorage) DeleteValues(urls []string, userID string) {
+
+	s.channel <- toDelete{
+		User:   userID,
+		Shorts: urls,
 	}
 }
 
 func (s *DatabaseStorage) GetValue(key string) (string, error) {
 
-	var URL string
+	var (
+		URL string
+		isDeleted bool
+	)
 
-	getValueQuery := fmt.Sprintf(`SELECT base_url FROM %s WHERE short_url = $1 LIMIT 1`, urlsTable)
+	getValueQuery := fmt.Sprintf(`SELECT base_url, is_deleted FROM %s WHERE short_url = $1 LIMIT 1`, urlsTable)
 	row := s.db.QueryRow(getValueQuery, fmt.Sprintf("%s/%s", s.config.BaseURL, key))
-	if err := row.Scan(&URL); err != nil {
+	if err := row.Scan(&URL, &isDeleted); err != nil {
 		return "", err
+	}
+
+	if isDeleted {
+		return "", nil
 	}
 
 	return URL, nil

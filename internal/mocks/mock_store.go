@@ -7,7 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	urls "github.com/AXlIS/go-shortener"
+	url "github.com/AXlIS/go-shortener"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -35,7 +35,7 @@ func (m *MockURLWorker) EXPECT() *MockURLWorkerMockRecorder {
 }
 
 // AddBatch mocks base method.
-func (m *MockURLWorker) AddBatch(arg0 []*urls.ShortenBatchInput) error {
+func (m *MockURLWorker) AddBatch(arg0 []*url.ShortenBatchInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddBatch", arg0)
 	ret0, _ := ret[0].(error)
@@ -62,11 +62,23 @@ func (mr *MockURLWorkerMockRecorder) AddValue(arg0, arg1, arg2 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddValue", reflect.TypeOf((*MockURLWorker)(nil).AddValue), arg0, arg1, arg2)
 }
 
+// DeleteValues mocks base method.
+func (m *MockURLWorker) DeleteValues(arg0 []string, arg1 string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "DeleteValues", arg0, arg1)
+}
+
+// DeleteValues indicates an expected call of DeleteValues.
+func (mr *MockURLWorkerMockRecorder) DeleteValues(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteValues", reflect.TypeOf((*MockURLWorker)(nil).DeleteValues), arg0, arg1)
+}
+
 // GetAllValues mocks base method.
-func (m *MockURLWorker) GetAllValues(arg0 string) ([]urls.Item, error) {
+func (m *MockURLWorker) GetAllValues(arg0 string) ([]url.Item, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllValues", arg0)
-	ret0, _ := ret[0].([]urls.Item)
+	ret0, _ := ret[0].([]url.Item)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
