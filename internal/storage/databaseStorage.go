@@ -60,6 +60,8 @@ func (s *DatabaseStorage) AsyncUpdate() {
 		task := <-s.channel
 		shorts := task.Shorts
 
+		log.Println(len(shorts))
+
 		for limit := len(shorts); limit > 0; limit = len(shorts) {
 			if limit > maxCountValues {
 				limit = maxCountValues
