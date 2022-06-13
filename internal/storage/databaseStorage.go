@@ -94,6 +94,8 @@ func (s *DatabaseStorage) GetValue(key string) (string, error) {
 		isDeleted bool
 	)
 
+	log.Println("key from storage function", key)
+
 	getValueQuery := fmt.Sprintf(`SELECT base_url, is_deleted FROM %s WHERE short_url = $1 LIMIT 1`, urlsTable)
 	row := s.db.QueryRow(getValueQuery, fmt.Sprintf("%s/%s", s.config.BaseURL, key))
 	if err := row.Scan(&URL, &isDeleted); err != nil {

@@ -135,6 +135,7 @@ func (h *Handler) GetShorten(c *gin.Context) {
 		return
 	}
 
+	log.Println("key:", key)
 	url, err := h.service.GetURL(key)
 	if err != nil {
 		errorResponse(c, http.StatusNotFound, err.Error())
