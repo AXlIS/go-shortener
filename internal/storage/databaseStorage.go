@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-const maxCountValues = 100
+const maxCountValues = 1
 
 type DatabaseStorage struct {
 	config  *config.Config
@@ -54,6 +54,8 @@ func NewDatabaseStorage(db *sqlx.DB, config *config.Config) *DatabaseStorage {
 func (s *DatabaseStorage) AsyncUpdate() {
 	query := fmt.Sprintf("UPDATE %s SET is_deleted = TRUE WHERE short_url = any ($1) AND user_id=$2;", urlsTable)
 
+	log.Println("start delete process in storage")
+
 	for {
 		task := <-s.channel
 		shorts := task.Shorts
@@ -66,13 +68,13 @@ func (s *DatabaseStorage) AsyncUpdate() {
 			deleteBatch := shorts[:limit]
 			shorts = shorts[limit:]
 
+			fmt.Println(deleteBatch)
+
 			if _, err := s.db.Exec(query, pq.Array(deleteBatch), task.User); err != nil {
 				log.Printf("AsyncUpdate: error: %s", err.Error())
 			}
-
 		}
 	}
-
 }
 
 func (s *DatabaseStorage) DeleteValues(urls []string, userID string) {

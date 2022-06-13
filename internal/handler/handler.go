@@ -12,6 +12,7 @@ import (
 	"github.com/lib/pq"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -204,7 +205,11 @@ func (h *Handler) DeleteShortens(c *gin.Context) {
 		return
 	}
 
+	log.Println("start delete process")
+
 	h.service.DeleteURLS(input, userID)
+
+	log.Println("finish delete process")
 
 	c.Header("content-type", "application/json")
 	c.Status(http.StatusAccepted)
