@@ -102,6 +102,8 @@ func (s *DatabaseStorage) GetValue(key string) (string, error) {
 		return "", err
 	}
 
+	log.Println(isDeleted)
+
 	if isDeleted {
 		return "", nil
 	}
