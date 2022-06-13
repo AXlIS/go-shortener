@@ -126,5 +126,5 @@ func (s *FileStorage) Ping() (bool, error) {
 }
 
 func (s *FileStorage) DeleteValues(urls []string, userID string) {
-
+	fmt.Println("Delete from file storage")
 }
