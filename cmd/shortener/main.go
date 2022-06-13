@@ -21,7 +21,7 @@ func init() {
 		log.Fatalf("Error loading env variables: %s", err.Error())
 	}
 
-	flag.StringVar(&fileStoragePath, "f", "", "path to file")
+	flag.StringVar(&fileStoragePath, "f", "storage.json", "path to file")
 	flag.StringVar(&serverAddress, "a", ":8080", "port")
 	flag.StringVar(&baseURL, "b", "http://localhost:8080", "base url")
 	flag.StringVar(&databaseDsn, "d", "", "database address")

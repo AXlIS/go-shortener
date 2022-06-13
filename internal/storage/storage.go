@@ -5,6 +5,7 @@ import (
 	"fmt"
 	urls "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
+	"log"
 )
 
 type URLWorker interface {
@@ -81,4 +82,5 @@ func (s *Storage) Ping() (bool, error) {
 
 func (s *Storage) DeleteValues(urls []string, userID string) {
 	fmt.Println("Delete from storage")
+	log.Println("Delete from storage")
 }
