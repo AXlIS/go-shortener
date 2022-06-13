@@ -81,6 +81,5 @@ func (s *Storage) Ping() (bool, error) {
 }
 
 func (s *Storage) DeleteValues(urls []string, userID string) {
-	fmt.Println("Delete from storage")
 	log.Println("Delete from storage")
 }

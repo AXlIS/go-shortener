@@ -54,13 +54,9 @@ func NewDatabaseStorage(db *sqlx.DB, config *config.Config) *DatabaseStorage {
 func (s *DatabaseStorage) AsyncUpdate() {
 	query := fmt.Sprintf("UPDATE %s SET is_deleted = TRUE WHERE short_url = any ($1) AND user_id=$2;", urlsTable)
 
-	log.Println("start delete process in storage")
-
 	for {
 		task := <-s.channel
 		shorts := task.Shorts
-
-		log.Println(len(shorts))
 
 		for limit := len(shorts); limit > 0; limit = len(shorts) {
 			if limit > maxCountValues {
@@ -94,15 +90,11 @@ func (s *DatabaseStorage) GetValue(key string) (string, error) {
 		isDeleted bool
 	)
 
-	log.Println("key from storage function", key)
-
 	getValueQuery := fmt.Sprintf(`SELECT base_url, is_deleted FROM %s WHERE short_url = $1 LIMIT 1`, urlsTable)
 	row := s.db.QueryRow(getValueQuery, fmt.Sprintf("%s/%s", s.config.BaseURL, key))
 	if err := row.Scan(&URL, &isDeleted); err != nil {
 		return "", err
 	}
-
-	log.Println(isDeleted)
 
 	if isDeleted {
 		return "", nil
