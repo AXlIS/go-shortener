@@ -72,6 +72,17 @@ func (s *Service) AddBatchURL(urls []*u.ShortenBatchInput, userID string) ([]u.S
 	return shortenURLS, nil
 }
 
+func (s *Service) DeleteURLS(urls []string, userID string) {
+	var changedURLS []string
+
+	for _, item := range urls {
+		changedURLS = append(changedURLS, fmt.Sprintf("%s/%s", s.config.BaseURL, item))
+	}
+
+	go s.storage.DeleteValues(changedURLS, userID)
+
+}
+
 func (s *Service) Ping() (bool, error) {
 	ping, err := s.storage.Ping()
 	return ping, err

@@ -7,6 +7,7 @@ import (
 	urls "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"io"
+	"log"
 	"os"
 )
 
@@ -123,4 +124,8 @@ func (s *FileStorage) GetAllValues(userID string) ([]urls.Item, error) {
 
 func (s *FileStorage) Ping() (bool, error) {
 	return false, errors.New("storage in file is active")
+}
+
+func (s *FileStorage) DeleteValues(urls []string, userID string) {
+	log.Println("Delete from file storage")
 }

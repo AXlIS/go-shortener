@@ -5,6 +5,7 @@ import (
 	"fmt"
 	urls "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
+	"log"
 )
 
 type URLWorker interface {
@@ -12,6 +13,7 @@ type URLWorker interface {
 	AddBatch(input []*urls.ShortenBatchInput) error
 	GetValue(key string) (string, error)
 	GetAllValues(userID string) ([]urls.Item, error)
+	DeleteValues(urls []string, userID string)
 	Ping() (bool, error)
 }
 
@@ -76,4 +78,8 @@ func (s *Storage) GetAllValues(userID string) ([]urls.Item, error) {
 
 func (s *Storage) Ping() (bool, error) {
 	return false, errors.New("storage in memory is active")
+}
+
+func (s *Storage) DeleteValues(urls []string, userID string) {
+	log.Println("Delete from storage")
 }
