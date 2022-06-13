@@ -8,7 +8,6 @@ import (
 	"github.com/AXlIS/go-shortener/internal/utils"
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
-	"log"
 )
 
 type Service struct {
@@ -74,9 +73,13 @@ func (s *Service) AddBatchURL(urls []*u.ShortenBatchInput, userID string) ([]u.S
 }
 
 func (s *Service) DeleteURLS(urls []string, userID string) {
-	log.Println("start delete process in service")
+
+	for _, item := range urls {
+		item = fmt.Sprintf("%s/%s", s.config.BaseURL, item)
+	}
+
 	go s.storage.DeleteValues(urls, userID)
-	log.Println("finish delete process in service")
+
 }
 
 func (s *Service) Ping() (bool, error) {
