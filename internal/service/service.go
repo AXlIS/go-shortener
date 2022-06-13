@@ -73,12 +73,13 @@ func (s *Service) AddBatchURL(urls []*u.ShortenBatchInput, userID string) ([]u.S
 }
 
 func (s *Service) DeleteURLS(urls []string, userID string) {
+	var changedURLS []string
 
 	for _, item := range urls {
-		item = fmt.Sprintf("%s/%s", s.config.BaseURL, item)
+		changedURLS = append(changedURLS, fmt.Sprintf("%s/%s", s.config.BaseURL, item))
 	}
 
-	go s.storage.DeleteValues(urls, userID)
+	go s.storage.DeleteValues(changedURLS, userID)
 
 }
 
