@@ -142,6 +142,8 @@ func (h *Handler) GetShorten(c *gin.Context) {
 		return
 	}
 
+	log.Println("result:",  url)
+
 	if url == "" {
 		log.Println(key)
 		c.Status(http.StatusGone)
