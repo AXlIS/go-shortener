@@ -7,6 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgerrcode"
@@ -15,6 +18,8 @@ import (
 	u "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/service"
+
+	_ "github.com/AXlIS/go-shortener/docs"
 )
 
 type Handler struct {
@@ -57,9 +62,23 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		}
 	}
 
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
 	return router
 }
 
+// CreateJSONShorten godoc
+// @Summary Create JSON Shorten
+// @Description Create new shorten URL
+// Tags API
+// @Accept json
+// @Produce json
+// @Param input body ShortenInput true "url"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} Error
+// @Failure 409 {object} Error
+// @Failure 500 {object} Error
+// @Router /api/shorten [post]
 func (h *Handler) CreateJSONShorten(c *gin.Context) {
 	var input ShortenInput
 
@@ -98,6 +117,17 @@ func (h *Handler) CreateJSONShorten(c *gin.Context) {
 	})
 }
 
+// CreateJSONShortenBatch godoc
+// @Summary Create JSON Shorten Batch
+// @Description Create new shorten batch of URLS
+// Tags API
+// @Accept json
+// @Produce json
+// @Param input body []u.ShortenBatchInput true "url"
+// @Success 201 {object} []url.ShortenBatchInput
+// @Failure 400 {object} Error
+// @Failure 500 {object} Error
+// @Router /api/shorten/batch [post]
 func (h *Handler) CreateJSONShortenBatch(c *gin.Context) {
 	var input []*u.ShortenBatchInput
 
@@ -129,6 +159,17 @@ func (h *Handler) CreateJSONShortenBatch(c *gin.Context) {
 	c.JSON(http.StatusCreated, urls)
 }
 
+// GetShorten godoc
+// @Summary Get Shorten
+// @Description Get shorten url
+// Tags API
+// @Accept json
+// @Produce json
+// @Param  id path string true "shorten url id"
+// @Success 410
+// @Failure 400 {object} Error
+// @Failure 404 {object} Error
+// @Router /{id} [get]
 func (h *Handler) GetShorten(c *gin.Context) {
 	key := c.Params.ByName("id")
 	if key == "" {

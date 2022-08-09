@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/AXlIS/go-shortener/internal/utils"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
@@ -161,5 +163,11 @@ func TestServer_CreateShorten(t *testing.T) {
 			assert.Equal(t, tt.want.response, string(body))
 			assert.NoError(t, err)
 		})
+	}
+}
+
+func BenchmarkHash(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		utils.GenerateString("userpassword")
 	}
 }

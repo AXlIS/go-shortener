@@ -3,6 +3,9 @@ package main
 import (
 	"flag"
 	"log"
+	"net/http"
+
+	_ "net/http/pprof"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -14,8 +17,19 @@ import (
 	store "github.com/AXlIS/go-shortener/internal/storage"
 )
 
+// @title Go Shortener App API
+// @version 1.0
+// description Service for shorting URLS
+
+// host localhost:8080
+// BasePath /
+
 var (
 	fileStoragePath, serverAddress, baseURL, databaseDsn string
+)
+
+const (
+	addr = ":8000" // адрес сервера
 )
 
 func init() {
@@ -65,7 +79,11 @@ func main() {
 
 	s := new(server.Server)
 
-	if err := s.Start(config.GetEnv("SERVER_ADDRESS", serverAddress), handlers.InitRoutes()); err != nil {
-		log.Fatalf("Error occured while running http server: %s", err.Error())
-	}
+	go func() {
+		if err := s.Start(config.GetEnv("SERVER_ADDRESS", serverAddress), handlers.InitRoutes()); err != nil {
+			log.Fatalf("Error occured while running http server: %s", err.Error())
+		}
+	}()
+
+	http.ListenAndServe(addr, nil)
 }
