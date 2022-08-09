@@ -2,12 +2,14 @@ package storage
 
 import (
 	"fmt"
-	urls "github.com/AXlIS/go-shortener"
-	"github.com/AXlIS/go-shortener/internal/config"
+	"log"
+
 	"github.com/jackc/pgerrcode"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"log"
+
+	urls "github.com/AXlIS/go-shortener"
+	"github.com/AXlIS/go-shortener/internal/config"
 )
 
 const maxCountValues = 1
@@ -86,7 +88,7 @@ func (s *DatabaseStorage) DeleteValues(urls []string, userID string) {
 func (s *DatabaseStorage) GetValue(key string) (string, error) {
 
 	var (
-		URL string
+		URL       string
 		isDeleted bool
 	)
 

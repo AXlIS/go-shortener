@@ -2,12 +2,14 @@ package service
 
 import (
 	"fmt"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/lib/pq"
+
 	u "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/storage"
 	"github.com/AXlIS/go-shortener/internal/utils"
-	"github.com/jackc/pgerrcode"
-	"github.com/lib/pq"
 )
 
 type Service struct {

@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	urls "github.com/AXlIS/go-shortener"
-	"github.com/AXlIS/go-shortener/internal/config"
 	"io"
 	"log"
 	"os"
+
+	urls "github.com/AXlIS/go-shortener"
+	"github.com/AXlIS/go-shortener/internal/config"
 )
 
 type FileStorage struct {

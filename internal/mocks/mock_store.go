@@ -7,8 +7,9 @@ package mocks
 import (
 	reflect "reflect"
 
-	url "github.com/AXlIS/go-shortener"
 	gomock "github.com/golang/mock/gomock"
+
+	url "github.com/AXlIS/go-shortener"
 )
 
 // MockURLWorker is a mock of URLWorker interface.

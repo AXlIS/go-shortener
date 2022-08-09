@@ -2,14 +2,16 @@ package main
 
 import (
 	"flag"
+	"log"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/handler"
 	"github.com/AXlIS/go-shortener/internal/server"
 	"github.com/AXlIS/go-shortener/internal/service"
 	store "github.com/AXlIS/go-shortener/internal/storage"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-	"log"
 )
 
 var (

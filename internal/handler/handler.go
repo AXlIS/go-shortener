@@ -3,16 +3,18 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	u "github.com/AXlIS/go-shortener"
-	"github.com/AXlIS/go-shortener/internal/config"
-	"github.com/AXlIS/go-shortener/internal/service"
+	"io"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
-	"io"
-	"io/ioutil"
-	"net/http"
+
+	u "github.com/AXlIS/go-shortener"
+	"github.com/AXlIS/go-shortener/internal/config"
+	"github.com/AXlIS/go-shortener/internal/service"
 )
 
 type Handler struct {

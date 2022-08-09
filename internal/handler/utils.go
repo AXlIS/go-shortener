@@ -2,8 +2,10 @@ package handler
 
 import (
 	"crypto/rand"
-	"github.com/AXlIS/go-shortener/internal/utils"
+
 	"github.com/gin-gonic/gin"
+
+	"github.com/AXlIS/go-shortener/internal/utils"
 )
 
 func GenerateRandom(size int) ([]byte, error) {

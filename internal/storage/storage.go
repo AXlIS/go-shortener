@@ -3,9 +3,10 @@ package storage
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	urls "github.com/AXlIS/go-shortener"
 	"github.com/AXlIS/go-shortener/internal/config"
-	"log"
 )
 
 type URLWorker interface {

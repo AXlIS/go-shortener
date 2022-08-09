@@ -1,17 +1,19 @@
 package server
 
 import (
-	"github.com/AXlIS/go-shortener/internal/config"
-	"github.com/AXlIS/go-shortener/internal/handler"
-	"github.com/AXlIS/go-shortener/internal/mocks"
-	"github.com/AXlIS/go-shortener/internal/service"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/AXlIS/go-shortener/internal/config"
+	"github.com/AXlIS/go-shortener/internal/handler"
+	"github.com/AXlIS/go-shortener/internal/mocks"
+	"github.com/AXlIS/go-shortener/internal/service"
 )
 
 type Want struct {

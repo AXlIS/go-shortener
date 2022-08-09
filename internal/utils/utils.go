@@ -3,9 +3,10 @@ package utils
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/itchyny/base58-go"
 	"log"
 	"math/big"
+
+	"github.com/itchyny/base58-go"
 )
 
 func Sha256Of(initialString string) []byte {
