@@ -23,6 +23,9 @@ import (
 
 var (
 	fileStoragePath, serverAddress, baseURL, databaseDsn string
+	buildVersion                                         string = "N/A"
+	buildDate                                            string = "N/A"
+	buildCommit                                          string = "N/A"
 )
 
 const (
@@ -30,6 +33,11 @@ const (
 )
 
 func init() {
+
+	log.Printf("Build version: %s", buildVersion)
+	log.Printf("Build date: %s", buildDate)
+	log.Printf("Build commit: %s", buildCommit)
+
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading env variables: %s", err.Error())
 	}
@@ -76,9 +84,7 @@ func main() {
 
 	s := new(server.Server)
 
-	go func() {
-		if err := s.Start(config.GetEnv("SERVER_ADDRESS", serverAddress), handlers.InitRoutes()); err != nil {
-			log.Fatalf("Error occured while running http server: %s", err.Error())
-		}
-	}()
+	if err := s.Start(config.GetEnv("SERVER_ADDRESS", serverAddress), handlers.InitRoutes()); err != nil {
+		log.Fatalf("Error occured while running http server: %s", err.Error())
+	}
 }
