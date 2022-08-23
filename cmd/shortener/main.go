@@ -2,13 +2,10 @@ package main
 
 import (
 	"flag"
-	"log"
-	"net/http"
-
-	_ "net/http/pprof"
-
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"log"
+	_ "net/http/pprof"
 
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/handler"
@@ -84,6 +81,4 @@ func main() {
 			log.Fatalf("Error occured while running http server: %s", err.Error())
 		}
 	}()
-
-	http.ListenAndServe(addr, nil)
 }
