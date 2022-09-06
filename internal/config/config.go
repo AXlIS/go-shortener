@@ -1,10 +1,53 @@
 package config
 
-import "os"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"path/filepath"
+)
 
 // Config ...
 type Config struct {
 	BaseURL string
+}
+
+type JSONConfig struct {
+	ServerAddress   string `json:"server_address"`
+	BaseURL         string `json:"base_url"`
+	FileStoragePath string `json:"file_storage_path"`
+	DatabaseDSN     string `json:"database_dsn"`
+	EnableHTTPS     bool   `json:"enable_https"`
+}
+
+func NewJSONConfig() *JSONConfig {
+	var config JSONConfig
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file, err := os.OpenFile(filepath.Join(pwd, "config.json"), os.O_RDONLY, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(data)
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &config
 }
 
 func NewConfig(URL string) *Config {
@@ -13,10 +56,23 @@ func NewConfig(URL string) *Config {
 	}
 }
 
-func GetEnv(key, defaultValue string) string {
+type Env interface {
+	string | bool
+}
+
+func GetEnv(key string, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
 		return defaultValue
 	}
 	return value
+}
+
+func GetBoolEnv(key string, defaultValue bool) bool {
+	_, exists := os.LookupEnv(key)
+	if !exists {
+		return defaultValue
+	}
+	return exists
+
 }
