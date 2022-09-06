@@ -1,13 +1,12 @@
 package server
 
 import (
+	urls "github.com/AXlIS/go-shortener"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/AXlIS/go-shortener/internal/utils"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -166,8 +165,36 @@ func TestServer_CreateShorten(t *testing.T) {
 	}
 }
 
-func BenchmarkHash(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		utils.GenerateString("userpassword")
+func TestServer_GetAllShortens(t *testing.T) {
+	items := []urls.Item{
+		urls.Item{
+			ShortURL:    "http://localhost:8080/KRJARhJf5S",
+			OriginalURL: "https://www.yandex.ru/",
+			IsDeleted:   false,
+		},
+	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := mocks.NewMockURLWorker(ctrl)
+	s.EXPECT().GetAllValues(gomock.Any()).Return(items)
+
+	tests := []struct {
+		name    string
+		request string
+		body    string
+		want    Want
+	}{
+		{
+			name: "Get 200 OK Test",
+			request: ""
+		},
 	}
 }
+
+//func BenchmarkHash(b *testing.B) {
+//	for i := 0; i < b.N; i++ {
+//		utils.GenerateString("userpassword")
+//	}
+//}
