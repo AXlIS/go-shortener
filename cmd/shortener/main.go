@@ -25,12 +25,11 @@ import (
 // BasePath /
 
 var (
-	jsonConfig                                           config.JSONConfig
-	fileStoragePath, serverAddress, baseURL, databaseDsn string
-	buildVersion                                         string = "N/A"
-	buildDate                                            string = "N/A"
-	buildCommit                                          string = "N/A"
-	tls                                                  bool
+	fileStoragePath, serverAddress, baseURL, databaseDsn, trustedSubnet string
+	buildVersion                                                        string = "N/A"
+	buildDate                                                           string = "N/A"
+	buildCommit                                                         string = "N/A"
+	tls                                                                 bool
 )
 
 const (
@@ -53,6 +52,7 @@ func init() {
 	flag.StringVar(&serverAddress, "a", ":8080", "port")
 	flag.StringVar(&baseURL, "b", JSONConfig.FileStoragePath, "base url")
 	flag.StringVar(&databaseDsn, "d", JSONConfig.DatabaseDSN, "database address")
+	flag.StringVar(&trustedSubnet, "t", JSONConfig.TrustedSubnet, "trusted subnet")
 	flag.BoolVar(&tls, "s", JSONConfig.EnableHTTPS, "enable https")
 	flag.Parse()
 
@@ -67,7 +67,7 @@ func main() {
 		err     error
 	)
 
-	conf := config.NewConfig(baseURL)
+	conf := config.NewConfig(baseURL, trustedSubnet)
 
 	if databasePath := config.GetEnv("DATABASE_DSN", databaseDsn); databasePath != "" {
 		db, err := store.NewPostgresDB(databasePath)

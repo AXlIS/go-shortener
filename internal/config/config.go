@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 )
 
 // Config ...
 type Config struct {
-	BaseURL string
+	BaseURL       string
+	TrustedSubnet net.IPNet
 }
 
 type JSONConfig struct {
@@ -20,6 +22,7 @@ type JSONConfig struct {
 	FileStoragePath string `json:"file_storage_path"`
 	DatabaseDSN     string `json:"database_dsn"`
 	EnableHTTPS     bool   `json:"enable_https"`
+	TrustedSubnet   string `json:"trusted_subnet"`
 }
 
 func NewJSONConfig() *JSONConfig {
@@ -50,9 +53,16 @@ func NewJSONConfig() *JSONConfig {
 	return &config
 }
 
-func NewConfig(URL string) *Config {
+func NewConfig(URL, trustedSubnet string) *Config {
+	_, network, err := net.ParseCIDR(trustedSubnet)
+
+	if err != nil {
+		log.Printf("WARN can`t parse TRUSTED_SUBNET")
+	}
+
 	return &Config{
-		BaseURL: URL,
+		BaseURL:       URL,
+		TrustedSubnet: *network,
 	}
 }
 

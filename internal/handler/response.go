@@ -7,10 +7,10 @@ import (
 )
 
 type Error struct {
-	Message string
+	Error string
 }
 
 func errorResponse(c *gin.Context, statusCode int, message string) {
 	log.Println(message)
-	c.AbortWithStatusJSON(statusCode, Error{Message: message})
+	c.AbortWithStatusJSON(statusCode, Error{Error: message})
 }
