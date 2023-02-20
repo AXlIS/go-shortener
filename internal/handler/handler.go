@@ -40,6 +40,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	router.Use(CookieHandler())
 	router.Use(DecompressBody())
+	router.Use(AuthHandler(h))
 	router.Use(gzip.Gzip(gzip.BestCompression))
 
 	router.POST("/", h.CreateShorten)

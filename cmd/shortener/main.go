@@ -1,17 +1,20 @@
 package main
 
 import (
+	"context"
 	"flag"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-	"log"
-	_ "net/http/pprof"
-
 	"github.com/AXlIS/go-shortener/internal/config"
 	"github.com/AXlIS/go-shortener/internal/handler"
 	"github.com/AXlIS/go-shortener/internal/server"
 	"github.com/AXlIS/go-shortener/internal/service"
 	store "github.com/AXlIS/go-shortener/internal/storage"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"log"
+	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 // @title Go Shortener App API
@@ -22,10 +25,11 @@ import (
 // BasePath /
 
 var (
-	fileStoragePath, serverAddress, baseURL, databaseDsn string
-	buildVersion                                         string = "N/A"
-	buildDate                                            string = "N/A"
-	buildCommit                                          string = "N/A"
+	fileStoragePath, serverAddress, baseURL, databaseDsn, trustedSubnet string
+	buildVersion                                                        string = "N/A"
+	buildDate                                                           string = "N/A"
+	buildCommit                                                         string = "N/A"
+	tls                                                                 bool
 )
 
 const (
@@ -42,10 +46,14 @@ func init() {
 		log.Fatalf("Error loading env variables: %s", err.Error())
 	}
 
-	flag.StringVar(&fileStoragePath, "f", "storage.json", "path to file")
+	JSONConfig := config.NewJSONConfig()
+
+	flag.StringVar(&fileStoragePath, "f", JSONConfig.FileStoragePath, "path to file")
 	flag.StringVar(&serverAddress, "a", ":8080", "port")
-	flag.StringVar(&baseURL, "b", "http://localhost:8080", "base url")
-	flag.StringVar(&databaseDsn, "d", "", "database address")
+	flag.StringVar(&baseURL, "b", JSONConfig.BaseURL, "base url")
+	flag.StringVar(&databaseDsn, "d", JSONConfig.DatabaseDSN, "database address")
+	flag.StringVar(&trustedSubnet, "t", JSONConfig.TrustedSubnet, "trusted subnet")
+	flag.BoolVar(&tls, "s", JSONConfig.EnableHTTPS, "enable https")
 	flag.Parse()
 
 	if path := config.GetEnv("BASE_URL", ""); path != "" {
@@ -59,7 +67,7 @@ func main() {
 		err     error
 	)
 
-	conf := config.NewConfig(baseURL)
+	conf := config.NewConfig(baseURL, trustedSubnet)
 
 	if databasePath := config.GetEnv("DATABASE_DSN", databaseDsn); databasePath != "" {
 		db, err := store.NewPostgresDB(databasePath)
@@ -84,7 +92,18 @@ func main() {
 
 	s := new(server.Server)
 
-	if err := s.Start(config.GetEnv("SERVER_ADDRESS", serverAddress), handlers.InitRoutes()); err != nil {
-		log.Fatalf("Error occured while running http server: %s", err.Error())
+	go func() {
+		if err := s.Start(config.GetEnv("SERVER_ADDRESS", serverAddress), handlers.InitRoutes(), config.GetBoolEnv("ENABLE_HTTPS", tls)); err != nil {
+			log.Fatalf("Error occured while running https server: %s", err.Error())
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	if err := s.Shutdown(context.Background()); err != nil {
+		log.Fatalf("error occured on server shutting down: %s", err.Error())
 	}
+
 }

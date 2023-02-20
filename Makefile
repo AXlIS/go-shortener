@@ -6,4 +6,4 @@ build:
 .DEFAULT_GOAL := build
 
 run:
-	go run -v -ldflags "-X main.buildVersion=v1.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')'" ./cmd/shortener/main.go
+	go run -v -ldflags "-X main.buildVersion=v1.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')'" ./cmd/shortener/main.go -s=false

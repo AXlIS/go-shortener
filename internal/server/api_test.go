@@ -7,8 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/AXlIS/go-shortener/internal/utils"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
@@ -47,7 +45,7 @@ func TestServer_CreateJSONShorten(t *testing.T) {
 		},
 	}
 
-	conf := config.NewConfig("http://localhost:8080")
+	conf := config.NewConfig("http://localhost:8080", "0.0.0.0/0")
 	services := service.NewService(s, conf)
 	handlers := handler.NewHandler(services, conf)
 
@@ -97,7 +95,7 @@ func TestServer_GetShorten(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		conf := config.NewConfig("http://localhost:8080")
+		conf := config.NewConfig("http://localhost:8080", "0.0.0.0/0")
 		services := service.NewService(s, conf)
 		handlers := handler.NewHandler(services, conf)
 
@@ -141,7 +139,7 @@ func TestServer_CreateShorten(t *testing.T) {
 		},
 	}
 
-	conf := config.NewConfig("http://localhost:8080")
+	conf := config.NewConfig("http://localhost:8080", "0.0.0.0/0")
 	services := service.NewService(s, conf)
 	handlers := handler.NewHandler(services, conf)
 
@@ -166,8 +164,8 @@ func TestServer_CreateShorten(t *testing.T) {
 	}
 }
 
-func BenchmarkHash(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		utils.GenerateString("userpassword")
-	}
-}
+//func BenchmarkHash(b *testing.B) {
+//	for i := 0; i < b.N; i++ {
+//		utils.GenerateString("userpassword")
+//	}
+//}

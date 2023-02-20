@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -82,6 +83,33 @@ func CookieHandler() gin.HandlerFunc {
 
 			c.SetCookie(IdentityKey, fmt.Sprintf("%x%x", id, sign), 3600, "/", "", false, false)
 			c.Set(IdentityKey, string(id))
+		}
+
+		c.Next()
+	}
+}
+
+func AuthHandler(h *Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if h.config.TrustedSubnet.String() == "0.0.0.0/0" {
+			c.Next()
+			return
+		}
+
+		ipStr := c.GetHeader("X-Real-IP")
+		if ipStr == "" {
+			errorResponse(c, http.StatusForbidden, "X-Real-IP not set")
+			return
+		}
+		ip := net.ParseIP(ipStr)
+		if ip == nil {
+			e := fmt.Sprintf("X-Real-IP=%s not valid ip", ipStr)
+			errorResponse(c, http.StatusForbidden, e)
+			return
+		}
+		if !h.config.TrustedSubnet.Contains(ip) {
+			errorResponse(c, http.StatusForbidden, "access denied")
+			return
 		}
 
 		c.Next()
