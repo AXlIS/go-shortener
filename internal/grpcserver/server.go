@@ -61,7 +61,11 @@ func (s *ShortenServer) GetShorten(ctx context.Context, in *pb.GetShortenRequest
 	}
 
 	header := metadata.Pairs("Location", url)
-	_ = grpc.SendHeader(ctx, header)
+	err = grpc.SendHeader(ctx, header)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &response, nil
 }
 

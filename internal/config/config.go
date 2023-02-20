@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -43,7 +42,6 @@ func NewJSONConfig() *JSONConfig {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(data)
 
 	err = json.Unmarshal(data, &config)
 	if err != nil {
