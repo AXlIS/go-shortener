@@ -1,7 +1,6 @@
 package server
 
 import (
-	urls "github.com/AXlIS/go-shortener"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -46,7 +45,7 @@ func TestServer_CreateJSONShorten(t *testing.T) {
 		},
 	}
 
-	conf := config.NewConfig("http://localhost:8080")
+	conf := config.NewConfig("http://localhost:8080", "0.0.0.0/0")
 	services := service.NewService(s, conf)
 	handlers := handler.NewHandler(services, conf)
 
@@ -96,7 +95,7 @@ func TestServer_GetShorten(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		conf := config.NewConfig("http://localhost:8080")
+		conf := config.NewConfig("http://localhost:8080", "0.0.0.0/0")
 		services := service.NewService(s, conf)
 		handlers := handler.NewHandler(services, conf)
 
@@ -140,7 +139,7 @@ func TestServer_CreateShorten(t *testing.T) {
 		},
 	}
 
-	conf := config.NewConfig("http://localhost:8080")
+	conf := config.NewConfig("http://localhost:8080", "0.0.0.0/0")
 	services := service.NewService(s, conf)
 	handlers := handler.NewHandler(services, conf)
 
@@ -162,34 +161,6 @@ func TestServer_CreateShorten(t *testing.T) {
 			assert.Equal(t, tt.want.response, string(body))
 			assert.NoError(t, err)
 		})
-	}
-}
-
-func TestServer_GetAllShortens(t *testing.T) {
-	items := []urls.Item{
-		urls.Item{
-			ShortURL:    "http://localhost:8080/KRJARhJf5S",
-			OriginalURL: "https://www.yandex.ru/",
-			IsDeleted:   false,
-		},
-	}
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	s := mocks.NewMockURLWorker(ctrl)
-	s.EXPECT().GetAllValues(gomock.Any()).Return(items)
-
-	tests := []struct {
-		name    string
-		request string
-		body    string
-		want    Want
-	}{
-		{
-			name: "Get 200 OK Test",
-			request: ""
-		},
 	}
 }
 

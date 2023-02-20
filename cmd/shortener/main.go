@@ -50,7 +50,7 @@ func init() {
 
 	flag.StringVar(&fileStoragePath, "f", JSONConfig.FileStoragePath, "path to file")
 	flag.StringVar(&serverAddress, "a", ":8080", "port")
-	flag.StringVar(&baseURL, "b", JSONConfig.FileStoragePath, "base url")
+	flag.StringVar(&baseURL, "b", JSONConfig.BaseURL, "base url")
 	flag.StringVar(&databaseDsn, "d", JSONConfig.DatabaseDSN, "database address")
 	flag.StringVar(&trustedSubnet, "t", JSONConfig.TrustedSubnet, "trusted subnet")
 	flag.BoolVar(&tls, "s", JSONConfig.EnableHTTPS, "enable https")
