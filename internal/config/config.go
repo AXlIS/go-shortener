@@ -64,9 +64,9 @@ func NewConfig(URL, trustedSubnet string) *Config {
 	}
 }
 
-type Env interface {
-	string | bool
-}
+//type Env interface {
+//	string | bool
+//}
 
 func GetEnv(key string, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
